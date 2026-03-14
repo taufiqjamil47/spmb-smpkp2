@@ -76,3 +76,80 @@ Aplikasi Pendaftaran Peserta Didik Baru (PPDB) berbasis web dengan Laravel. Sist
 2. Route tetap: /pendaftaran/cetak/{id}
 3. Route dinamis: /pendaftaran/{id}
 ```
+
+## Instalasi (Windows / XAMPP)
+
+### 1) Prasyarat
+
+- **PHP 8.2+** (dijalankan melalui XAMPP atau PHP CLI)
+- **Composer** (https://getcomposer.org/)
+- **Node.js + npm** (https://nodejs.org/)
+- **MySQL / MariaDB** (biasanya sudah tersedia di XAMPP)
+
+> 🔧 Jika menggunakan XAMPP, pastikan Apache dan MySQL sudah dijalankan.
+
+### 2) Siapkan Proyek
+
+```bash
+cd C:\xampp\htdocs\spmb-smpkp2
+```
+
+### 3) Install Dependensi PHP & JavaScript
+
+```bash
+composer install
+npm install
+```
+
+### 4) Siapkan File Environment
+
+```bash
+copy .env.example .env
+```
+
+Lalu edit file `.env` untuk menyesuaikan konfigurasi database (DB_DATABASE, DB_USERNAME, DB_PASSWORD).
+
+> Contoh (XAMPP default):
+>
+> DB_CONNECTION=mysql
+> DB_HOST=127.0.0.1
+> DB_PORT=3306
+> DB_DATABASE=spmb_smpkp2
+> DB_USERNAME=root
+> DB_PASSWORD=
+
+### 5) Generate App Key dan Migrasi Database
+
+```bash
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+```
+
+> Jika belum membuat database, buat dulu database MySQL dengan nama yang sesuai (`spmb_smpkp2` atau nama yang kamu gunakan di `.env`).
+
+### 6) Jalankan Aplikasi
+
+#### Opsi A (development - hot reload)
+
+```bash
+npm run dev
+```
+
+Kemudian kunjungi: http://127.0.0.1:5173 (atau alamat yang ditampilkan di terminal).
+
+#### Opsi B (Laravel built-in server)
+
+```bash
+php artisan serve
+```
+
+Kemudian kunjungi: http://127.0.0.1:8000
+
+---
+
+## Tips Tambahan
+
+- **Reset data**: `php artisan migrate:fresh --seed`
+- **Build production assets**: `npm run build`
+- **Cek queue** (dipakai untuk notifikasi/processing): `php artisan queue:work`
