@@ -11,6 +11,84 @@
             </div>
             <div class="flex space-x-2">
                 @if (auth()->user()->role === 'admin')
+                    <!-- Tombol Export Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open"
+                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center">
+                            <i class="fas fa-download mr-2"></i>
+                            Export
+                            <i class="fas fa-chevron-down ml-2 text-xs"></i>
+                        </button>
+
+                        <div x-show="open" @click.away="open = false"
+                            class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg z-50 border">
+
+                            <div class="p-3 border-b bg-gray-50 rounded-t-lg">
+                                <p class="font-semibold text-sm">Pilih Format</p>
+                            </div>
+
+                            <div class="p-2">
+                                <!-- Export dengan filter -->
+                                <form action="{{ route('export.excel') }}" method="GET" class="mb-2">
+                                    <input type="hidden" name="tahun" value="{{ request('tahun') }}">
+                                    <input type="hidden" name="status" value="aktif">
+                                    <button type="submit"
+                                        class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center">
+                                        <i class="fas fa-file-excel text-green-600 w-5 mr-2"></i>
+                                        Excel (.xlsx)
+                                    </button>
+                                </form>
+
+                                <form action="{{ route('export.csv') }}" method="GET" class="mb-2">
+                                    <input type="hidden" name="tahun" value="{{ request('tahun') }}">
+                                    <input type="hidden" name="status" value="aktif">
+                                    <button type="submit"
+                                        class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center">
+                                        <i class="fas fa-file-csv text-blue-600 w-5 mr-2"></i>
+                                        CSV (.csv)
+                                    </button>
+                                </form>
+
+                                <div class="border-t my-2"></div>
+
+                                <!-- Export dengan status berbeda -->
+                                <form action="{{ route('export.excel') }}" method="GET" class="mb-2">
+                                    <input type="hidden" name="tahun" value="{{ request('tahun') }}">
+                                    <input type="hidden" name="status" value="all">
+                                    <button type="submit"
+                                        class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center text-sm">
+                                        <i class="fas fa-database text-purple-600 w-5 mr-2"></i>
+                                        Excel - Semua (termasuk trash)
+                                    </button>
+                                </form>
+
+                                <form action="{{ route('export.excel') }}" method="GET" class="mb-2">
+                                    <input type="hidden" name="status" value="trash">
+                                    <button type="submit"
+                                        class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center text-sm">
+                                        <i class="fas fa-trash-alt text-red-600 w-5 mr-2"></i>
+                                        Excel - Hanya Trash
+                                    </button>
+                                </form>
+
+                                <div class="border-t my-2"></div>
+
+                                <a href="{{ route('export.template') }}"
+                                    class="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center text-sm">
+                                    <i class="fas fa-file-import text-yellow-600 w-5 mr-2"></i>
+                                    Download Template Import
+                                </a>
+                            </div>
+
+                            <div class="p-2 border-t bg-gray-50 rounded-b-lg">
+                                <p class="text-xs text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Data akan difilter berdasarkan pencarian saat ini
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <a href="{{ route('pendaftaran.trash') }}"
                         class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
                         <i class="fas fa-trash-alt mr-2"></i>Trash
@@ -82,7 +160,8 @@
                         <td class="px-6 py-4">
                             <div class="flex space-x-2">
                                 <a href="{{ route('pendaftaran.show', $siswa->id) }}"
-                                    class="text-blue-600 hover:text-blue-900 bg-blue-100 p-2 rounded" title="Lihat detail">
+                                    class="text-blue-600 hover:text-blue-900 bg-blue-100 p-2 rounded"
+                                    title="Lihat detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
 
@@ -130,4 +209,7 @@
     <div class="mt-6">
         {{ $pendaftar->appends(request()->query())->links() }}
     </div>
+
+    <!-- Tambahkan Alpine.js untuk dropdown -->
+    <script src="//unpkg.com/alpinejs" defer></script>
 @endsection

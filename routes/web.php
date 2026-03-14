@@ -6,6 +6,7 @@ use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ExportController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -52,6 +53,13 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::resource('tahun-ajaran', TahunAjaranController::class);
         Route::resource('users', UserController::class);
+    });
+
+    // Routes untuk export (khusus admin)
+    Route::middleware(['role:admin'])->prefix('export')->name('export.')->group(function () {
+        Route::get('/excel', [PendaftaranController::class, 'exportExcel'])->name('excel');
+        Route::get('/csv', [PendaftaranController::class, 'exportCsv'])->name('csv');
+        Route::get('/template', [PendaftaranController::class, 'exportTemplate'])->name('template');
     });
 });
 

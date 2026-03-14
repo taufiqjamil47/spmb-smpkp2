@@ -6,6 +6,9 @@ use App\Models\CalonSiswa;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\CalonSiswaExport;
+use App\Exports\CalonSiswaCsvExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PendaftaranController extends Controller
 {
@@ -305,5 +308,140 @@ class PendaftaranController extends Controller
 
         return redirect()->route('pendaftaran.index')
             ->with('success', "{$count} data siswa berhasil dihapus permanen.");
+    }
+
+    public function exportExcel(Request $request)
+    {
+        // Hanya admin yang bisa export
+        if (auth()->user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk export data.');
+        }
+
+        $tahunAjaranId = $request->tahun;
+        $status = $request->status; // 'aktif', 'trash', 'all'
+
+        $fileName = 'data-pendaftar-ppdb';
+
+        // Tambahkan info tahun ke nama file
+        if ($tahunAjaranId) {
+            $tahun = TahunAjaran::find($tahunAjaranId);
+            $fileName .= '-' . ($tahun ? $tahun->tahun_ajaran : '');
+        }
+
+        // Tambahkan info status
+        if ($status == 'trash') {
+            $fileName .= '-terhapus';
+        } elseif ($status == 'all') {
+            $fileName .= '-all';
+        }
+
+        $fileName .= '-' . date('Y-m-d-His') . '.xlsx';
+
+        return Excel::download(
+            new CalonSiswaExport($tahunAjaranId, $status),
+            $fileName
+        );
+    }
+
+    /**
+     * Export data ke CSV
+     */
+    public function exportCsv(Request $request)
+    {
+        // Hanya admin yang bisa export
+        if (auth()->user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk export data.');
+        }
+
+        $tahunAjaranId = $request->tahun;
+        $status = $request->status;
+
+        $fileName = 'data-pendaftar-ppdb';
+
+        if ($tahunAjaranId) {
+            $tahun = TahunAjaran::find($tahunAjaranId);
+            $fileName .= '-' . ($tahun ? $tahun->tahun_ajaran : '');
+        }
+
+        if ($status == 'trash') {
+            $fileName .= '-terhapus';
+        } elseif ($status == 'all') {
+            $fileName .= '-all';
+        }
+
+        $fileName .= '-' . date('Y-m-d-His') . '.csv';
+
+        return Excel::download(
+            new CalonSiswaCsvExport($tahunAjaranId, $status),
+            $fileName
+        );
+    }
+
+    /**
+     * Export template untuk import (jika diperlukan)
+     */
+    public function exportTemplate()
+    {
+        $headers = [
+            'NO_PESERTA',
+            'NISN',
+            'NAMA_LENGKAP',
+            'TEMPAT_LAHIR',
+            'TANGGAL_LAHIR (Y-m-d)',
+            'JENIS_KELAMIN (L/P)',
+            'AGAMA',
+            'ALAMAT',
+            'NO_HP_SISWA',
+            'SEKOLAH_ASAL',
+            'TAHUN_LULUS',
+            'NAMA_AYAH',
+            'NAMA_IBU',
+            'PEKERJAAN_ORTU',
+            'NO_HP_ORTU'
+        ];
+
+        $data = [
+            [
+                'PPDB-2024-0001',
+                '1234567890',
+                'CONTOH: BUDI SANTOSO',
+                'Jakarta',
+                '2010-01-01',
+                'L',
+                'Islam',
+                'Jl. Contoh No. 123',
+                '081234567890',
+                'SDN Contoh 01',
+                '2024',
+                'Ahmad Santoso',
+                'Siti Aminah',
+                'Wiraswasta',
+                '081234567891'
+            ]
+        ];
+
+        return Excel::download(
+            new class($headers, $data) implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings {
+                protected $headers;
+                protected $data;
+
+                public function __construct($headers, $data)
+                {
+                    $this->headers = $headers;
+                    $this->data = $data;
+                }
+
+                public function array(): array
+                {
+                    return $this->data;
+                }
+
+                public function headings(): array
+                {
+                    return $this->headers;
+                }
+            },
+            'template-import-ppdb.xlsx'
+        );
     }
 }
