@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="mb-6">
-        <h1 class="text-3xl font-bold">Dashboard PPDB</h1>
+        <h1 class="text-3xl font-bold">Dashboard</h1>
         <p class="text-gray-600">Selamat datang, {{ auth()->user()->name }}! ({{ ucfirst(auth()->user()->role) }})</p>
     </div>
 

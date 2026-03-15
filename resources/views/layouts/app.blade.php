@@ -7,55 +7,112 @@
     <title>PPDB SMP - @yield('title')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .sidebar-transition {
+            transition: width 0.3s ease-in-out;
+        }
+
+        .menu-text {
+            transition: opacity 0.2s ease-in-out, margin 0.3s ease-in-out;
+        }
+
+        .sidebar-collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+            display: none;
+        }
+
+        .sidebar-collapsed .nav-link {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .sidebar-collapsed .fa-2x {
+            margin-right: 0 !important;
+        }
+
+        .toggle-btn {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-collapsed .toggle-btn {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100">
-    <div class="min-h-screen flex">
+    <div class="min-h-screen flex relative">
         <!-- Sidebar -->
-        <div class="w-64 bg-blue-800 text-white">
-            <div class="p-4">
-                <h2 class="text-2xl font-bold">PPDB SMP</h2>
-                <p class="text-sm opacity-75">Tahun Ajaran {{ date('Y') }}</p>
+        <div class="sidebar bg-blue-800 text-white flex flex-col fixed h-screen sidebar-transition"
+            style="width: 240px; z-index: 50;" id="sidebar">
+
+            <!-- Header dengan toggle button -->
+            <div class="p-4 flex items-center justify-between">
+                <div class="menu-text">
+                    <h2 class="text-2xl font-bold whitespace-nowrap">SPMB SMP</h2>
+                    <p class="text-sm opacity-75 whitespace-nowrap">Tahun Ajaran {{ date('Y') }}</p>
+                </div>
+                <button onclick="toggleSidebar()" class="text-white hover:bg-blue-700 p-2 rounded-lg toggle-btn">
+                    <i class="fas fa-chevron-left fa-2x"></i>
+                </button>
             </div>
 
-            <nav class="mt-8">
+            <!-- Navigation Menu - Scrollable area -->
+            <nav class="flex-1 overflow-y-auto py-4">
                 <a href="{{ route('dashboard') }}"
-                    class="block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('dashboard') ? 'bg-blue-700' : '' }}">
-                    <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                    class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('dashboard') ? 'bg-blue-700' : '' }} flex items-center">
+                    <i class="fas fa-tachometer-alt mr-3 w-5"></i>
+                    <span class="menu-text whitespace-nowrap">Dashboard</span>
                 </a>
 
                 <a href="{{ route('pendaftaran.index') }}"
-                    class="block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('pendaftaran.*') ? 'bg-blue-700' : '' }}">
-                    <i class="fas fa-users mr-2"></i> Data Pendaftar
+                    class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('pendaftaran.*') ? 'bg-blue-700' : '' }} flex items-center">
+                    <i class="fas fa-users mr-3 w-5"></i>
+                    <span class="menu-text whitespace-nowrap">Data Pendaftar</span>
                 </a>
 
-                <a href="{{ route('pendaftaran.create') }}" class="block py-3 px-4 hover:bg-blue-700">
-                    <i class="fas fa-user-plus mr-2"></i> Pendaftaran Baru
+                <a href="{{ route('pendaftaran.create') }}"
+                    class="nav-link block py-3 px-4 hover:bg-blue-700 flex items-center">
+                    <i class="fas fa-user-plus mr-3 w-5"></i>
+                    <span class="menu-text whitespace-nowrap">Pendaftaran Baru</span>
                 </a>
 
                 @if (auth()->check() && auth()->user()->role === 'admin')
                     <div class="border-t border-blue-700 my-4"></div>
 
                     <a href="{{ route('tahun-ajaran.index') }}"
-                        class="block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('tahun-ajaran.*') ? 'bg-blue-700' : '' }}">
-                        <i class="fas fa-calendar mr-2"></i> Kelola Kuota
+                        class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('tahun-ajaran.*') ? 'bg-blue-700' : '' }} flex items-center">
+                        <i class="fas fa-calendar mr-3 w-5"></i>
+                        <span class="menu-text whitespace-nowrap">Kelola Kuota</span>
                     </a>
 
                     <a href="{{ route('users.index') }}"
-                        class="block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('users.*') ? 'bg-blue-700' : '' }}">
-                        <i class="fas fa-user-cog mr-2"></i> Kelola User
+                        class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('users.*') ? 'bg-blue-700' : '' }} flex items-center">
+                        <i class="fas fa-user-cog mr-3 w-5"></i>
+                        <span class="menu-text whitespace-nowrap">Kelola User</span>
                     </a>
                 @endif
             </nav>
 
-            <div class="absolute bottom-0 w-64 p-4 border-t border-blue-700">
+            <!-- User Info & Logout - Fixed at bottom -->
+            <div class="border-t border-blue-700 p-4">
                 @if (auth()->check())
-                    <p class="text-sm">{{ auth()->user()->name }}</p>
-                    <p class="text-xs opacity-75">{{ ucfirst(auth()->user()->role) }}</p>
-                    <form method="POST" action="{{ route('logout') }}" class="mt-2">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-blue-600 rounded-full p-2 mr-3 w-10 h-10 flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div class="menu-text">
+                            <p class="text-sm font-medium whitespace-nowrap">{{ auth()->user()->name }}</p>
+                            <p class="text-xs opacity-75 whitespace-nowrap">{{ ucfirst(auth()->user()->role) }}</p>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}" class="menu-text">
                         @csrf
-                        <button type="submit" class="text-sm hover:underline">
-                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        <button type="submit"
+                            class="text-sm hover:underline text-blue-200 hover:text-white w-full text-left flex items-center">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
                         </button>
                     </form>
                 @endif
@@ -63,7 +120,8 @@
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 p-8">
+        <div class="flex-1 p-8 transition-all duration-300" style="margin-left: 240px;" id="mainContent">
+
             @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                     {{ session('success') }}
@@ -79,6 +137,50 @@
             @yield('content')
         </div>
     </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+
+            if (isCollapsed) {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.style.width = '240px';
+                mainContent.style.marginLeft = '240px';
+            } else {
+                sidebar.classList.add('sidebar-collapsed');
+                sidebar.style.width = '80px';
+                mainContent.style.marginLeft = '80px';
+            }
+
+            // Simpan preferensi user di localStorage
+            localStorage.setItem('sidebarCollapsed', !isCollapsed);
+        }
+
+        // Cek preferensi tersimpan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+            if (isCollapsed) {
+                sidebar.classList.add('sidebar-collapsed');
+                sidebar.style.width = '80px';
+                mainContent.style.marginLeft = '80px';
+            }
+        });
+
+        // Menangani klik pada link saat sidebar collapsed
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('sidebar-collapsed')) {
+                    // Optional: Auto expand saat hover? Bisa ditambahkan jika diinginkan
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
