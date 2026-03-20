@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CalonSiswaCsvExport;
+use App\Exports\CalonSiswaExport;
 use App\Models\CalonSiswa;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Exports\CalonSiswaExport;
-use App\Exports\CalonSiswaCsvExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PendaftaranController extends Controller
@@ -68,25 +69,40 @@ class PendaftaranController extends Controller
 
         // Validasi data
         $request->validate([
+            // Data wajib
             'nama_lengkap' => 'required|min:3',
             'nisn' => 'required|unique:calon_siswas,nisn',
+            'nik' => 'required|unique:calon_siswas,nik',
             'tempat_lahir' => 'required',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required',
             'agama' => 'required',
             'alamat' => 'required',
-            'no_hp_siswa' => 'required',
             'sekolah_asal' => 'required',
             'tahun_lulus' => 'required|digits:4',
             'nama_ayah' => 'required',
             'nama_ibu' => 'required',
-            'pekerjaan_ortu' => 'required',
             'no_hp_ortu' => 'required',
+
+            // Validasi numerik
+            'rt' => 'nullable|numeric',
+            'rw' => 'nullable|numeric',
+            'tinggi_badan' => 'nullable|numeric',
+            'berat_badan' => 'nullable|numeric',
+            'anak_ke' => 'nullable|numeric',
+
+            // Validasi tahun
+            'tahun_lahir_ayah' => 'nullable|digits:4',
+            'tahun_lahir_ibu' => 'nullable|digits:4',
+            'tahun_lahir_wali' => 'nullable|digits:4',
+        ], [
+            'nisn.unique' => 'NISN sudah terdaftar',
+            'nik.unique' => 'NIK sudah terdaftar',
         ]);
 
         // Generate nomor peserta otomatis
         $tahun = date('Y');
-        $lastSiswa = CalonSiswa::withTrashed() // Include soft deleted records
+        $lastSiswa = CalonSiswa::withTrashed()
             ->whereYear('created_at', $tahun)
             ->orderBy('id', 'desc')
             ->first();
@@ -100,25 +116,71 @@ class PendaftaranController extends Controller
 
         $no_peserta = 'PPDB-' . $tahun . '-' . $newNumber;
 
-        // Simpan data
-        $calonSiswa = CalonSiswa::create([
+        // Siapkan data untuk disimpan
+        $data = [
             'no_peserta' => $no_peserta,
             'tahun_ajaran_id' => $tahunAjaranAktif->id,
+            'periode' => $tahunAjaranAktif->tahun_ajaran,
+
+            // Data pribadi
             'nama_lengkap' => $request->nama_lengkap,
             'nisn' => $request->nisn,
+            'nik' => $request->nik,
             'tempat_lahir' => $request->tempat_lahir,
             'tanggal_lahir' => $request->tanggal_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
             'agama' => $request->agama,
+
+            // Alamat
             'alamat' => $request->alamat,
+            'rt' => $request->rt,
+            'rw' => $request->rw,
+            'desa' => $request->desa,
+            'kecamatan' => $request->kecamatan,
+
+            // Kontak
             'no_hp_siswa' => $request->no_hp_siswa,
+            'no_telp' => $request->no_telp,
+
+            // Sekolah
             'sekolah_asal' => $request->sekolah_asal,
             'tahun_lulus' => $request->tahun_lulus,
+
+            // Kesehatan
+            'tinggi_badan' => $request->tinggi_badan,
+            'berat_badan' => $request->berat_badan,
+            'anak_ke' => $request->anak_ke,
+            'ukuran_baju' => $request->ukuran_baju,
+
+            // Bantuan
+            'pkh' => $request->pkh,
+            'kks' => $request->kks,
+            'pip' => $request->pip,
+
+            // Ayah
             'nama_ayah' => $request->nama_ayah,
+            'tahun_lahir_ayah' => $request->tahun_lahir_ayah,
+            'pekerjaan_ayah' => $request->pekerjaan_ayah,
+            'pendidikan_ayah' => $request->pendidikan_ayah,
+
+            // Ibu
             'nama_ibu' => $request->nama_ibu,
-            'pekerjaan_ortu' => $request->pekerjaan_ortu,
+            'tahun_lahir_ibu' => $request->tahun_lahir_ibu,
+            'pekerjaan_ibu' => $request->pekerjaan_ibu,
+            'pendidikan_ibu' => $request->pendidikan_ibu,
+
+            // Wali
+            'nama_wali' => $request->nama_wali,
+            'tahun_lahir_wali' => $request->tahun_lahir_wali,
+            'pekerjaan_wali' => $request->pekerjaan_wali,
+            'pendidikan_wali' => $request->pendidikan_wali,
+
+            // Kontak orang tua
             'no_hp_ortu' => $request->no_hp_ortu,
-        ]);
+        ];
+
+        // Simpan data
+        $calonSiswa = CalonSiswa::create($data);
 
         return redirect()->route('pendaftaran.show', $calonSiswa->id)
             ->with('success', 'Pendaftaran berhasil! Nomor peserta: ' . $no_peserta);
@@ -131,6 +193,131 @@ class PendaftaranController extends Controller
             ->findOrFail($id);
 
         return view('pendaftaran.show', compact('pendaftar'));
+    }
+
+    public function edit($id)
+    {
+        // Hanya admin yang bisa edit
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $pendaftar = CalonSiswa::withTrashed()->findOrFail($id);
+        $tahunAjaran = TahunAjaran::orderBy('tahun_ajaran', 'desc')->get();
+
+        return view('pendaftaran.edit', compact('pendaftar', 'tahunAjaran'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        // Hanya admin yang bisa update
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $pendaftar = CalonSiswa::withTrashed()->findOrFail($id);
+
+        // Validasi data
+        $request->validate([
+            // Data wajib
+            'nama_lengkap' => 'required|min:3',
+            'nisn' => 'required|unique:calon_siswas,nisn,' . $id,
+            'nik' => 'required|unique:calon_siswas,nik,' . $id,
+            'tempat_lahir' => 'required',
+            'tanggal_lahir' => 'required|date',
+            'jenis_kelamin' => 'required',
+            'agama' => 'required',
+            'alamat' => 'required',
+            'sekolah_asal' => 'required',
+            'tahun_lulus' => 'required|digits:4',
+            'nama_ayah' => 'required',
+            'nama_ibu' => 'required',
+            'no_hp_ortu' => 'required',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajarans,id',
+
+            // Validasi numerik
+            'rt' => 'nullable|numeric',
+            'rw' => 'nullable|numeric',
+            'tinggi_badan' => 'nullable|numeric',
+            'berat_badan' => 'nullable|numeric',
+            'anak_ke' => 'nullable|numeric',
+
+            // Validasi tahun
+            'tahun_lahir_ayah' => 'nullable|digits:4',
+            'tahun_lahir_ibu' => 'nullable|digits:4',
+            'tahun_lahir_wali' => 'nullable|digits:4',
+        ]);
+
+        // Siapkan data untuk update
+        $data = [
+            'tahun_ajaran_id' => $request->tahun_ajaran_id,
+            'periode' => TahunAjaran::find($request->tahun_ajaran_id)->tahun_ajaran,
+
+            // Data pribadi
+            'nama_lengkap' => $request->nama_lengkap,
+            'nisn' => $request->nisn,
+            'nik' => $request->nik,
+            'tempat_lahir' => $request->tempat_lahir,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'agama' => $request->agama,
+
+            // Alamat
+            'alamat' => $request->alamat,
+            'rt' => $request->rt,
+            'rw' => $request->rw,
+            'desa' => $request->desa,
+            'kecamatan' => $request->kecamatan,
+
+            // Kontak
+            'no_hp_siswa' => $request->no_hp_siswa,
+            'no_telp' => $request->no_telp,
+
+            // Sekolah
+            'sekolah_asal' => $request->sekolah_asal,
+            'tahun_lulus' => $request->tahun_lulus,
+
+            // Kesehatan
+            'tinggi_badan' => $request->tinggi_badan,
+            'berat_badan' => $request->berat_badan,
+            'anak_ke' => $request->anak_ke,
+            'ukuran_baju' => $request->ukuran_baju,
+
+            // Bantuan
+            'pkh' => $request->pkh,
+            'kks' => $request->kks,
+            'pip' => $request->pip,
+
+            // Ayah
+            'nama_ayah' => $request->nama_ayah,
+            'tahun_lahir_ayah' => $request->tahun_lahir_ayah,
+            'pekerjaan_ayah' => $request->pekerjaan_ayah,
+            'pendidikan_ayah' => $request->pendidikan_ayah,
+
+            // Ibu
+            'nama_ibu' => $request->nama_ibu,
+            'tahun_lahir_ibu' => $request->tahun_lahir_ibu,
+            'pekerjaan_ibu' => $request->pekerjaan_ibu,
+            'pendidikan_ibu' => $request->pendidikan_ibu,
+
+            // Wali
+            'nama_wali' => $request->nama_wali,
+            'tahun_lahir_wali' => $request->tahun_lahir_wali,
+            'pekerjaan_wali' => $request->pekerjaan_wali,
+            'pendidikan_wali' => $request->pendidikan_wali,
+
+            // Kontak orang tua
+            'no_hp_ortu' => $request->no_hp_ortu,
+        ];
+
+        // Update data
+        $pendaftar->update($data);
+
+        return redirect()->route('pendaftaran.show', $pendaftar->id)
+            ->with('success', 'Data siswa berhasil diperbarui.');
     }
 
     public function cetakKartu($id)
@@ -166,7 +353,7 @@ class PendaftaranController extends Controller
         $calonSiswa = CalonSiswa::findOrFail($id);
 
         // Hanya admin yang bisa hapus
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki izin untuk menghapus data.'
@@ -190,7 +377,7 @@ class PendaftaranController extends Controller
     public function restore($id)
     {
         // Hanya admin yang bisa restore
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki izin untuk mengembalikan data.'
@@ -226,7 +413,7 @@ class PendaftaranController extends Controller
     public function forceDelete($id)
     {
         // Hanya admin yang bisa force delete
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki izin untuk menghapus data permanen.'
@@ -267,7 +454,7 @@ class PendaftaranController extends Controller
     public function restoreAll()
     {
         // Hanya admin yang bisa restore all
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
@@ -284,7 +471,7 @@ class PendaftaranController extends Controller
     public function emptyTrash()
     {
         // Hanya admin yang bisa empty trash
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
@@ -313,7 +500,7 @@ class PendaftaranController extends Controller
     public function exportExcel(Request $request)
     {
         // Hanya admin yang bisa export
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk export data.');
         }
 
@@ -349,7 +536,7 @@ class PendaftaranController extends Controller
     public function exportCsv(Request $request)
     {
         // Hanya admin yang bisa export
-        if (auth()->user()->role !== 'admin') {
+        if (Auth::user()->role !== 'admin') {
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk export data.');
         }
 

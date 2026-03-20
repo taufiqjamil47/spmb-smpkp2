@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\PendaftaranController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ExportController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -35,8 +36,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cetak/{id}', [PendaftaranController::class, 'cetakKartu'])->name('cetak');
 
         // 4. Route dengan parameter DINAMIS (paling akhir)
-        Route::get('/{id}/edit', [PendaftaranController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [PendaftaranController::class, 'update'])->name('update');
+        // Route::get('/{id}/edit', [PendaftaranController::class, 'edit'])->name('edit');
+        // Route::put('/{id}', [PendaftaranController::class, 'update'])->name('update');
         Route::get('/{id}', [PendaftaranController::class, 'show'])->name('show');
 
         // 5. Route DELETE khusus admin (paling akhir)
@@ -53,6 +54,11 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::resource('tahun-ajaran', TahunAjaranController::class);
         Route::resource('users', UserController::class);
+
+        // Tambahkan route edit untuk pendaftaran
+        Route::get('pendaftaran/{id}/edit', [PendaftaranController::class, 'edit'])->name('pendaftaran.edit');
+        Route::put('pendaftaran/{id}', [PendaftaranController::class, 'update'])->name('pendaftaran.update');
+        Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
     });
 
     // Routes untuk export (khusus admin)

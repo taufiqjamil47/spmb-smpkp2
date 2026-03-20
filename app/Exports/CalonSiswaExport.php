@@ -12,7 +12,6 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents
@@ -26,9 +25,6 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
         $this->status = $status;
     }
 
-    /**
-     * @return \Illuminate\Support\Collection
-     */
     public function collection()
     {
         $query = CalonSiswa::with('tahunAjaran');
@@ -46,27 +42,46 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
         return $query->get();
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         return [
             'NO',
             'NO PESERTA',
             'NISN',
+            'NIK',
             'NAMA LENGKAP',
             'TEMPAT LAHIR',
             'TANGGAL LAHIR',
             'JENIS KELAMIN',
             'AGAMA',
             'ALAMAT',
+            'RT',
+            'RW',
+            'DESA',
+            'KECAMATAN',
             'NO HP SISWA',
+            'NO TELP',
             'SEKOLAH ASAL',
             'TAHUN LULUS',
+            'TINGGI BADAN',
+            'BERAT BADAN',
+            'ANAK KE',
+            'UKURAN BAJU',
+            'PKH',
+            'KKS',
+            'PIP',
             'NAMA AYAH',
+            'TAHUN LAHIR AYAH',
+            'PEKERJAAN AYAH',
+            'PENDIDIKAN AYAH',
             'NAMA IBU',
-            'PEKERJAAN ORTU',
+            'TAHUN LAHIR IBU',
+            'PEKERJAAN IBU',
+            'PENDIDIKAN IBU',
+            'NAMA WALI',
+            'TAHUN LAHIR WALI',
+            'PEKERJAAN WALI',
+            'PENDIDIKAN WALI',
             'NO HP ORTU',
             'TAHUN AJARAN',
             'TANGGAL DAFTAR',
@@ -75,10 +90,6 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
         ];
     }
 
-    /**
-     * @param mixed $siswa
-     * @return array
-     */
     public function map($siswa): array
     {
         static $rowNumber = 0;
@@ -91,18 +102,40 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
             $rowNumber,
             $siswa->no_peserta,
             $siswa->nisn,
+            $siswa->nik,
             $siswa->nama_lengkap,
             $siswa->tempat_lahir,
             $siswa->tanggal_lahir,
             $jk,
             $siswa->agama,
             $siswa->alamat,
+            $siswa->rt,
+            $siswa->rw,
+            $siswa->desa,
+            $siswa->kecamatan,
             $siswa->no_hp_siswa,
+            $siswa->no_telp,
             $siswa->sekolah_asal,
             $siswa->tahun_lulus,
+            $siswa->tinggi_badan,
+            $siswa->berat_badan,
+            $siswa->anak_ke,
+            $siswa->ukuran_baju,
+            $siswa->pkh,
+            $siswa->kks,
+            $siswa->pip,
             $siswa->nama_ayah,
+            $siswa->tahun_lahir_ayah,
+            $siswa->pekerjaan_ayah,
+            $siswa->pendidikan_ayah,
             $siswa->nama_ibu,
-            $siswa->pekerjaan_ortu,
+            $siswa->tahun_lahir_ibu,
+            $siswa->pekerjaan_ibu,
+            $siswa->pendidikan_ibu,
+            $siswa->nama_wali,
+            $siswa->tahun_lahir_wali,
+            $siswa->pekerjaan_wali,
+            $siswa->pendidikan_wali,
             $siswa->no_hp_ortu,
             $siswa->tahunAjaran->tahun_ajaran ?? '-',
             $siswa->created_at->format('d/m/Y H:i'),
@@ -111,56 +144,31 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
         ];
     }
 
-    /**
-     * @param Worksheet $sheet
-     * @return array
-     */
     public function styles(Worksheet $sheet)
     {
         return [
             1 => [
-                'font' => ['bold' => true, 'size' => 12],
+                'font' => ['bold' => true, 'size' => 11],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4B5563']
+                    'startColor' => ['rgb' => '2563EB']
                 ],
                 'font' => ['color' => ['rgb' => 'FFFFFF']]
             ],
         ];
     }
 
-    /**
-     * @return array
-     */
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // Style untuk header
-                $sheet->getStyle('A1:T1')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'color' => ['rgb' => 'FFFFFF']
-                    ],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => '2563EB']
-                    ],
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '000000']
-                        ]
-                    ]
-                ]);
-
-                // Style untuk sel data
                 $lastRow = $sheet->getHighestRow();
                 $lastColumn = $sheet->getHighestColumn();
 
-                $sheet->getStyle('A2:' . $lastColumn . $lastRow)->applyFromArray([
+                // Border untuk semua sel
+                $sheet->getStyle('A1:' . $lastColumn . $lastRow)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -169,9 +177,9 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
                     ]
                 ]);
 
-                // Warna baris untuk status
+                // Warna baris untuk status dihapus
                 for ($row = 2; $row <= $lastRow; $row++) {
-                    $status = $sheet->getCell('S' . $row)->getValue();
+                    $status = $sheet->getCell('AP' . $row)->getValue();
                     if ($status == 'DIHAPUS') {
                         $sheet->getStyle('A' . $row . ':' . $lastColumn . $row)
                             ->getFill()

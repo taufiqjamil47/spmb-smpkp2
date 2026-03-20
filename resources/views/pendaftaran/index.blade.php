@@ -172,6 +172,14 @@
                                 </a>
 
                                 @if (auth()->user()->role === 'admin')
+                                    <a href="{{ route('pendaftaran.edit', $siswa->id) }}"
+                                        class="text-yellow-600 hover:text-yellow-900 bg-yellow-100 p-2 rounded"
+                                        title="Edit data">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                @endif
+
+                                @if (auth()->user()->role === 'admin')
                                     <form action="{{ route('pendaftaran.destroy', $siswa->id) }}" method="POST"
                                         class="inline" onsubmit="return confirm('Pindahkan data ini ke trash?')">
                                         @csrf

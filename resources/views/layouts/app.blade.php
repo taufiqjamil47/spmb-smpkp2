@@ -88,6 +88,12 @@
                         <span class="menu-text whitespace-nowrap">Kelola Kuota</span>
                     </a>
 
+                    <a href="{{ route('statistik.index') }}"
+                        class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('statistik.*') ? 'bg-blue-700' : '' }} flex items-center">
+                        <i class="fas fa-chart-pie mr-3 w-5"></i>
+                        <span class="menu-text whitespace-nowrap">Statistik</span>
+                    </a>
+
                     <a href="{{ route('users.index') }}"
                         class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('users.*') ? 'bg-blue-700' : '' }} flex items-center">
                         <i class="fas fa-user-cog mr-3 w-5"></i>
