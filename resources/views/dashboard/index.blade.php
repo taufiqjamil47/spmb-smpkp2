@@ -63,7 +63,8 @@
 
     @if ($tahunAjaranAktif)
         @php
-            $jumlahPendaftar = $tahunAjaranAktif->calonSiswa()->count();
+            // Use the eager-loaded count from controller
+            $jumlahPendaftar = $tahunAjaranAktif->calon_siswa_count ?? 0;
             $sisaKuota = $tahunAjaranAktif->kuota - $jumlahPendaftar;
             $persentase = round(($jumlahPendaftar / $tahunAjaranAktif->kuota) * 100);
 

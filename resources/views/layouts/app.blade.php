@@ -8,12 +8,32 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .sidebar-transition {
+        .sidebar {
+            width: 240px;
+        }
+
+        #mainContent {
+            margin-left: 240px;
+        }
+
+        .sidebar-ready .sidebar {
             transition: width 0.3s ease-in-out;
+        }
+
+        .sidebar-ready #mainContent {
+            transition: margin-left 0.3s ease-in-out;
         }
 
         .menu-text {
             transition: opacity 0.2s ease-in-out, margin 0.3s ease-in-out;
+        }
+
+        .sidebar-collapsed .sidebar {
+            width: 80px !important;
+        }
+
+        .sidebar-collapsed #mainContent {
+            margin-left: 80px !important;
         }
 
         .sidebar-collapsed .menu-text {
@@ -40,13 +60,23 @@
             transform: rotate(180deg);
         }
     </style>
+    <script>
+        try {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+            document.documentElement.classList.add('sidebar-ready');
+        } catch (e) {
+            // ignore if localStorage is unavailable
+        }
+    </script>
 </head>
 
 <body class="bg-gray-100">
     <div class="min-h-screen flex relative">
         <!-- Sidebar -->
-        <div class="sidebar bg-blue-800 text-white flex flex-col fixed h-screen sidebar-transition"
-            style="width: 240px; z-index: 50;" id="sidebar">
+        <div class="sidebar bg-blue-800 text-white flex flex-col fixed h-screen sidebar-transition" style="z-index: 50;"
+            id="sidebar">
 
             <!-- Header dengan toggle button -->
             <div class="p-4 flex items-center justify-between">
@@ -73,11 +103,11 @@
                     <span class="menu-text whitespace-nowrap">Data Pendaftar</span>
                 </a>
 
-                <a href="{{ route('pendaftaran.create') }}"
-                    class="nav-link block py-3 px-4 hover:bg-blue-700 flex items-center">
+                {{-- <a href="{{ route('pendaftaran.create') }}"
+                    class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('pendaftaran.create') ? 'bg-blue-700' : '' }} flex items-center">
                     <i class="fas fa-user-plus mr-3 w-5"></i>
                     <span class="menu-text whitespace-nowrap">Pendaftaran Baru</span>
-                </a>
+                </a> --}}
 
                 @if (auth()->check() && auth()->user()->role === 'admin')
                     <div class="border-t border-blue-700 my-4"></div>
@@ -94,11 +124,11 @@
                         <span class="menu-text whitespace-nowrap">Statistik</span>
                     </a>
 
-                    <a href="{{ route('users.index') }}"
+                    {{-- <a href="{{ route('users.index') }}"
                         class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('users.*') ? 'bg-blue-700' : '' }} flex items-center">
                         <i class="fas fa-user-cog mr-3 w-5"></i>
                         <span class="menu-text whitespace-nowrap">Kelola User</span>
-                    </a>
+                    </a> --}}
                 @endif
             </nav>
 
@@ -126,7 +156,7 @@
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 p-8 transition-all duration-300" style="margin-left: 240px;" id="mainContent">
+        <div class="flex-1 p-8 transition-all duration-300" id="mainContent">
 
             @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -146,44 +176,22 @@
 
     <script>
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
-
-            if (isCollapsed) {
-                sidebar.classList.remove('sidebar-collapsed');
-                sidebar.style.width = '240px';
-                mainContent.style.marginLeft = '240px';
-            } else {
-                sidebar.classList.add('sidebar-collapsed');
-                sidebar.style.width = '80px';
-                mainContent.style.marginLeft = '80px';
-            }
-
-            // Simpan preferensi user di localStorage
-            localStorage.setItem('sidebarCollapsed', !isCollapsed);
+            const isCollapsed = document.documentElement.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
         }
 
         // Cek preferensi tersimpan saat halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
             if (isCollapsed) {
-                sidebar.classList.add('sidebar-collapsed');
-                sidebar.style.width = '80px';
-                mainContent.style.marginLeft = '80px';
+                document.documentElement.classList.add('sidebar-collapsed');
             }
         });
 
         // Menangani klik pada link saat sidebar collapsed
         document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar.classList.contains('sidebar-collapsed')) {
-                    // Optional: Auto expand saat hover? Bisa ditambahkan jika diinginkan
-                }
+            link.addEventListener('click', function() {
+                // Placeholder for future behavior when collapsed
             });
         });
     </script>

@@ -37,7 +37,10 @@ class PendaftaranController extends Controller
         // Ambil data tahun ajaran untuk filter
         $tahunAjaran = TahunAjaran::orderBy('tahun_ajaran', 'desc')->get();
 
-        return view('pendaftaran.index', compact('pendaftar', 'tahunAjaran'));
+        // Get trash count once instead of querying in view
+        $trashCount = CalonSiswa::onlyTrashed()->count();
+
+        return view('pendaftaran.index', compact('pendaftar', 'tahunAjaran', 'trashCount'));
     }
 
     public function create()
@@ -123,10 +126,10 @@ class PendaftaranController extends Controller
             'periode' => $tahunAjaranAktif->tahun_ajaran,
 
             // Data pribadi
-            'nama_lengkap' => $request->nama_lengkap,
+            'nama_lengkap' => strtoupper($request->nama_lengkap),
             'nisn' => $request->nisn,
             'nik' => $request->nik,
-            'tempat_lahir' => $request->tempat_lahir,
+            'tempat_lahir' => strtoupper($request->tempat_lahir),
             'tanggal_lahir' => $request->tanggal_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
             'agama' => $request->agama,
@@ -135,15 +138,15 @@ class PendaftaranController extends Controller
             'alamat' => $request->alamat,
             'rt' => $request->rt,
             'rw' => $request->rw,
-            'desa' => $request->desa,
-            'kecamatan' => $request->kecamatan,
+            'desa' => strtoupper($request->desa),
+            'kecamatan' => strtoupper($request->kecamatan),
 
             // Kontak
             'no_hp_siswa' => $request->no_hp_siswa,
             'no_telp' => $request->no_telp,
 
             // Sekolah
-            'sekolah_asal' => $request->sekolah_asal,
+            'sekolah_asal' => strtoupper($request->sekolah_asal),
             'tahun_lulus' => $request->tahun_lulus,
 
             // Kesehatan
@@ -257,10 +260,10 @@ class PendaftaranController extends Controller
             'periode' => TahunAjaran::find($request->tahun_ajaran_id)->tahun_ajaran,
 
             // Data pribadi
-            'nama_lengkap' => $request->nama_lengkap,
+            'nama_lengkap' => strtoupper($request->nama_lengkap),
             'nisn' => $request->nisn,
             'nik' => $request->nik,
-            'tempat_lahir' => $request->tempat_lahir,
+            'tempat_lahir' => strtoupper($request->tempat_lahir),
             'tanggal_lahir' => $request->tanggal_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
             'agama' => $request->agama,
@@ -269,15 +272,15 @@ class PendaftaranController extends Controller
             'alamat' => $request->alamat,
             'rt' => $request->rt,
             'rw' => $request->rw,
-            'desa' => $request->desa,
-            'kecamatan' => $request->kecamatan,
+            'desa' => strtoupper($request->desa),
+            'kecamatan' => strtoupper($request->kecamatan),
 
             // Kontak
             'no_hp_siswa' => $request->no_hp_siswa,
             'no_telp' => $request->no_telp,
 
             // Sekolah
-            'sekolah_asal' => $request->sekolah_asal,
+            'sekolah_asal' => strtoupper($request->sekolah_asal),
             'tahun_lulus' => $request->tahun_lulus,
 
             // Kesehatan
@@ -384,7 +387,7 @@ class PendaftaranController extends Controller
             ], 403);
         }
 
-        $calonSiswa = CalonSiswa::onlyTrashed()->findOrFail($id);
+        $calonSiswa = CalonSiswa::onlyTrashed()->with('tahunAjaran')->findOrFail($id);
         $calonSiswa->restore();
 
         // Cek kuota tahun ajaran
@@ -420,12 +423,13 @@ class PendaftaranController extends Controller
             ], 403);
         }
 
-        $calonSiswa = CalonSiswa::onlyTrashed()->findOrFail($id);
+        $calonSiswa = CalonSiswa::onlyTrashed()->with('dokumen')->findOrFail($id);
 
-        // Hapus data terkait (dokumen, dll) jika ada
-        if ($calonSiswa->dokumen()->count() > 0) {
-            // Hapus file fisik
-            foreach ($calonSiswa->dokumen as $dokumen) {
+        // Hapus data terkait (dokumen, dll) jika ada - Optimized dengan eager loading
+        $dokumenList = $calonSiswa->dokumen;
+        if ($dokumenList->count() > 0) {
+            // Hapus file fisik untuk semua dokumen yang sudah di-load
+            foreach ($dokumenList as $dokumen) {
                 if (file_exists(public_path($dokumen->path))) {
                     unlink(public_path($dokumen->path));
                 }

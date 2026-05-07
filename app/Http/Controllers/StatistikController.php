@@ -103,32 +103,37 @@ class StatistikController extends Controller
             ->orderBy('ukuran_baju')
             ->get();
 
-        // Data untuk chart pendaftaran per bulan (tahun berjalan)
+        // Data untuk chart pendaftaran per bulan (tahun berjalan) - Optimized dengan raw query
         $bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-        $pendaftarPerBulan = [];
 
+        $bulanData = CalonSiswa::selectRaw("MONTH(created_at) as bulan, COUNT(*) as jumlah")
+            ->whereYear('created_at', date('Y'))
+            ->groupByRaw("MONTH(created_at)")
+            ->pluck('jumlah', 'bulan')
+            ->toArray();
+
+        $pendaftarPerBulan = [];
         foreach (range(1, 12) as $bulanNum) {
-            $count = CalonSiswa::whereYear('created_at', date('Y'))
-                ->whereMonth('created_at', $bulanNum)
-                ->count();
-            $pendaftarPerBulan[] = $count;
+            $pendaftarPerBulan[] = $bulanData[$bulanNum] ?? 0;
         }
 
-        // Data jika filter tahun dipilih
+        // Data jika filter tahun dipilih - Optimized dengan selectRaw
+        $statJkTahun = null;
+        $statAgamaTahun = null;
+
         if ($selectedTahun) {
             $tahunObj = TahunAjaran::find($selectedTahun);
             if ($tahunObj) {
-                $pendaftarTahun = CalonSiswa::where('tahun_ajaran_id', $selectedTahun)->get();
+                // Query grouped data directly without loading all records
+                $statJkTahun = CalonSiswa::where('tahun_ajaran_id', $selectedTahun)
+                    ->select('jenis_kelamin', DB::raw('count(*) as total'))
+                    ->groupBy('jenis_kelamin')
+                    ->pluck('total', 'jenis_kelamin');
 
-                $statJkTahun = $pendaftarTahun->groupBy('jenis_kelamin')
-                    ->map(function ($item) {
-                        return $item->count();
-                    });
-
-                $statAgamaTahun = $pendaftarTahun->groupBy('agama')
-                    ->map(function ($item) {
-                        return $item->count();
-                    });
+                $statAgamaTahun = CalonSiswa::where('tahun_ajaran_id', $selectedTahun)
+                    ->select('agama', DB::raw('count(*) as total'))
+                    ->groupBy('agama')
+                    ->pluck('total', 'agama');
             }
         }
 
@@ -146,7 +151,9 @@ class StatistikController extends Controller
             'statUkuranBaju',
             'statUkuranBajuTotal',
             'bulan',
-            'pendaftarPerBulan'
+            'pendaftarPerBulan',
+            'statJkTahun',
+            'statAgamaTahun'
         ));
     }
 

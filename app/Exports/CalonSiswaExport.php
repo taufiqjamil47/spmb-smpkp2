@@ -9,12 +9,18 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Events\AfterSheet;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents
+class CalonSiswaExport extends DefaultValueBinder implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithEvents, WithColumnFormatting, WithCustomValueBinder
 {
     protected $tahunAjaranId;
     protected $status;
@@ -90,6 +96,21 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
         ];
     }
 
+    // Custom value binder untuk menulis angka panjang sebagai text
+    public function bindValue(Cell $cell, $value)
+    {
+        $column = $cell->getColumn();
+
+        // Kolom C (NISN) dan D (NIK) sebagai text
+        if (in_array($column, ['C', 'D'])) {
+            $cell->setValueExplicit($value, DataType::TYPE_STRING);
+            return true;
+        }
+
+        // Default binding
+        return parent::bindValue($cell, $value);
+    }
+
     public function map($siswa): array
     {
         static $rowNumber = 0;
@@ -101,8 +122,8 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
         return [
             $rowNumber,
             $siswa->no_peserta,
-            $siswa->nisn,
-            $siswa->nik,
+            $siswa->nisn,      // Tidak perlu apostrophe
+            $siswa->nik,       // Tidak perlu apostrophe
             $siswa->nama_lengkap,
             $siswa->tempat_lahir,
             $siswa->tanggal_lahir,
@@ -155,6 +176,14 @@ class CalonSiswaExport implements FromCollection, WithHeadings, WithMapping, Wit
                 ],
                 'font' => ['color' => ['rgb' => 'FFFFFF']]
             ],
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'C' => NumberFormat::FORMAT_TEXT,
+            'D' => NumberFormat::FORMAT_TEXT,
         ];
     }
 

@@ -92,9 +92,6 @@
                     <a href="{{ route('pendaftaran.trash') }}"
                         class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
                         <i class="fas fa-trash-alt mr-2"></i>Trash
-                        @php
-                            $trashCount = \App\Models\CalonSiswa::onlyTrashed()->count();
-                        @endphp
                         @if ($trashCount > 0)
                             <span
                                 class="ml-1 bg-white text-orange-500 px-2 py-0.5 rounded-full text-xs">{{ $trashCount }}</span>

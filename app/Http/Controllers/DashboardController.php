@@ -11,7 +11,9 @@ class DashboardController extends Controller
     public function index()
     {
         // Ambil tahun ajaran aktif
-        $tahunAjaranAktif = TahunAjaran::where('status', 'aktif')->first();
+        $tahunAjaranAktif = TahunAjaran::where('status', 'aktif')
+            ->withCount('calonSiswa')
+            ->first();
 
         // Statistik umum
         $totalPendaftar = CalonSiswa::count();
@@ -26,15 +28,18 @@ class DashboardController extends Controller
         $chartLabels = $dataTahunAjaran->pluck('tahun_ajaran');
         $chartData = $dataTahunAjaran->pluck('calon_siswa_count');
 
-        // Data pendaftar per bulan (untuk tahun aktif)
+        // Data pendaftar per bulan (untuk tahun aktif) - Optimized dengan raw query
         $pendaftarPerBulan = [];
         if ($tahunAjaranAktif) {
+            $bulanData = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                ->selectRaw("MONTH(created_at) as bulan, COUNT(*) as jumlah")
+                ->groupByRaw("MONTH(created_at)")
+                ->pluck('jumlah', 'bulan')
+                ->toArray();
+
             for ($i = 1; $i <= 12; $i++) {
                 $bulan = date('F', mktime(0, 0, 0, $i, 1));
-                $jumlah = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)
-                    ->whereMonth('created_at', $i)
-                    ->count();
-                $pendaftarPerBulan[$bulan] = $jumlah;
+                $pendaftarPerBulan[$bulan] = $bulanData[$i] ?? 0;
             }
         }
 

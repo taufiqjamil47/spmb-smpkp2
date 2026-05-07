@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="id" class="h-full">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Fullstack Developer Portfolio | Laravel & Vue.js Expert</title>
+        <!-- Tailwind CSS + Fonts -->
+        <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+        <!-- Lucide Icons (CDN yang tepat untuk icon) -->
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <!-- Google Fonts -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
+            rel="stylesheet">
+        <style>
+            * { box-sizing: border-box; }
+            html, body { margin: 0; padding: 0; height: 100%; scroll-behavior: smooth; }
+            .font-sora { font-family: 'Sora', sans-serif; }
+            .font-mono { font-family: 'JetBrains Mono', monospace; }
+            
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-12px); }
+            }
+            @keyframes fadeUp {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes pulse-glow {
+                0%, 100% { box-shadow: 0 0 20px rgba(249, 115, 22, 0.3); }
+                50% { box-shadow: 0 0 40px rgba(249, 115, 22, 0.6); }
+            }
+            .animate-float { animation: float 4s ease-in-out infinite; }
+            .animate-fade-up { animation: fadeUp 0.8s ease-out forwards; opacity: 0; }
+            .delay-1 { animation-delay: 0.1s; }
+            .delay-2 { animation-delay: 0.2s; }
+            .delay-3 { animation-delay: 0.3s; }
+            .delay-4 { animation-delay: 0.4s; }
+            .delay-5 { animation-delay: 0.5s; }
+            .delay-6 { animation-delay: 0.6s; }
+            .pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+            
+            .project-card {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .project-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            }
+            .tech-pill {
+                transition: background 0.2s ease, transform 0.2s ease;
+            }
+            .tech-pill:hover {
+                transform: scale(1.05);
+            }
+            .nav-link {
+                position: relative;
+                transition: color 0.2s ease;
+            }
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                bottom: -4px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: #f97316;
+                transition: width 0.3s ease;
+            }
+            .nav-link:hover::after { width: 100%; }
+            
+            .grid-bg {
+                background-image: 
+                    linear-gradient(rgba(249,115,22,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(249,115,22,0.03) 1px, transparent 1px);
+                background-size: 60px 60px;
+            }
+
+            /* Fix gambar background dan overlay lebih rapi */
+            .hero-bg-overlay {
+                background: linear-gradient(90deg, rgba(15,15,15,0.95) 0%, rgba(15,15,15,0.7) 50%, rgba(15,15,15,0.3) 100%);
+            }
+            /* Sembunyikan scrollbar berlebih */
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #1a1a1a;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #f97316;
+                border-radius: 6px;
+            }
+        </style>
+    </head>
+    <body class="h-full">
+        <div id="app" class="w-full h-full overflow-auto font-sora"
+            style="background-color: #0f0f0f; color: #e8e8e8;">
+            <!-- Navigation -->
+            <nav
+                class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
+                style="background: rgba(15,15,15,0.85); border-color: rgba(249,115,22,0.15);">
+                <div
+                    class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                    <div class="font-mono text-sm font-medium"
+                        style="color: #f97316;">
+                        &lt;dev /&gt;
+                    </div>
+                    <div class="hidden md:flex gap-8">
+                        <a href="#home" class="nav-link text-sm"
+                            style="color: #e8e8e8;">Home</a>
+                        <a href="#about" class="nav-link text-sm"
+                            style="color: #e8e8e8;">About</a>
+                        <a href="#projects" class="nav-link text-sm"
+                            style="color: #e8e8e8;">Projects</a>
+                        <a href="#contact" class="nav-link text-sm"
+                            style="color: #e8e8e8;">Contact</a>
+                    </div>
+                    <button id="mobile-menu-btn" class="md:hidden"
+                        style="color: #e8e8e8;">
+                        <i data-lucide="menu"
+                            style="width:24px;height:24px;"></i>
+                    </button>
+                </div>
+                <!-- Mobile menu -->
+                <div id="mobile-menu"
+                    class="hidden md:hidden px-6 pb-4 flex flex-col gap-3 bg-[#0f0f0f]/95 backdrop-blur-md border-t border-[#2a2a2a]">
+                    <a href="#home" class="text-sm py-2"
+                        style="color: #e8e8e8;">Home</a>
+                    <a href="#about" class="text-sm py-2"
+                        style="color: #e8e8e8;">About</a>
+                    <a href="#projects" class="text-sm py-2"
+                        style="color: #e8e8e8;">Projects</a>
+                    <a href="#contact" class="text-sm py-2"
+                        style="color: #e8e8e8;">Contact</a>
+                </div>
+            </nav>
+
+            <!-- Hero Section dengan perbaikan gambar background (direct URL gambar yang bisa diakses tanpa login) -->
+            <section id="home"
+                class="min-h-full flex items-center relative px-6 pt-20 overflow-hidden">
+                <!-- Background Image Container (menggunakan gambar placeholder yang reliable, namun kita akan support custom image via config) -->
+                <div class="absolute inset-0 z-0">
+                    <img id="profile-image-bg"
+                        src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1600&h=900&fit=crop"
+                        alt="Background workspace"
+                        class="w-full h-full object-cover"
+                        style="object-position: center 30%;"
+                        loading="lazy">
+                    <!-- Overlay gradient -->
+                    <div class="absolute inset-0 hero-bg-overlay"></div>
+                </div>
+                <!-- Content -->
+                <div class="max-w-6xl mx-auto w-full py-16 relative z-10">
+                    <div class="max-w-2xl">
+                        <p
+                            class="font-mono text-sm mb-4 animate-fade-up delay-1"
+                            style="color: #f97316;">// Hello, World</p>
+                        <h1 id="hero-name"
+                            class="text-4xl md:text-6xl font-bold mb-4 animate-fade-up delay-2"
+                            style="color: #e8e8e8;">Taufiq Jamil Hanafi</h1>
+                        <p id="hero-tagline"
+                            class="text-xl md:text-2xl font-light mb-6 animate-fade-up delay-3"
+                            style="color: #a0a0a0;">Fullstack Laravel
+                            Developer</p>
+                        <p id="hero-description"
+                            class="text-base mb-8 animate-fade-up delay-4"
+                            style="color: #c0c0c0; line-height: 1.8;">Membangun
+                            aplikasi web yang robust, scalable, dan elegan
+                            dengan Laravel, Vue.js, dan teknologi modern
+                            lainnya.</p>
+                        <div
+                            class="flex gap-4 animate-fade-up delay-5 flex-wrap">
+                            <a href="#projects"
+                                class="px-6 py-3 rounded-lg font-medium text-sm transition-all pulse-glow"
+                                style="background: #f97316; color: #0f0f0f;">Lihat
+                                Project</a>
+                            <a href="#contact"
+                                class="px-6 py-3 rounded-lg font-medium text-sm border transition-all hover:border-orange-500"
+                                style="border-color: #333; color: #e8e8e8;">Hubungi
+                                Saya</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="px-6 py-24">
+                <div class="max-w-6xl mx-auto">
+                    <p class="font-mono text-sm mb-2" style="color: #f97316;">//
+                        Tentang Saya</p>
+                    <h2 class="text-3xl font-bold mb-8"
+                        style="color: #e8e8e8;">About</h2>
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <div>
+                            <p id="about-text"
+                                class="text-base leading-relaxed mb-6"
+                                style="color: #c0c0c0;">
+                                Saya adalah seorang fullstack developer dengan
+                                keahlian utama di ekosistem Laravel.
+                                Berpengalaman lebih dari 4 tahun membangun
+                                aplikasi web mulai dari startup hingga
+                                enterprise. Fokus pada clean code, performa
+                                tinggi, dan user experience yang luar biasa.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span
+                                    class="tech-pill px-3 py-1 rounded-full text-xs font-medium"
+                                    style="background: rgba(249,115,22,0.15); color: #f97316;">Laravel</span>
+                                <span
+                                    class="tech-pill px-3 py-1 rounded-full text-xs font-medium"
+                                    style="background: rgba(249,115,22,0.15); color: #f97316;">Vue.js</span>
+                                <span
+                                    class="tech-pill px-3 py-1 rounded-full text-xs font-medium"
+                                    style="background: rgba(249,115,22,0.15); color: #f97316;">Livewire</span>
+                                <span
+                                    class="tech-pill px-3 py-1 rounded-full text-xs font-medium"
+                                    style="background: rgba(249,115,22,0.15); color: #f97316;">MySQL</span>
+                                <span
+                                    class="tech-pill px-3 py-1 rounded-full text-xs font-medium"
+                                    style="background: rgba(249,115,22,0.15); color: #f97316;">Redis</span>
+                                <span
+                                    class="tech-pill px-3 py-1 rounded-full text-xs font-medium"
+                                    style="background: rgba(249,115,22,0.15); color: #f97316;">Docker</span>
+                                <span
+                                    class="tech-pill px-3 py-1 rounded-full text-xs font-medium"
+                                    style="background: rgba(249,115,22,0.15); color: #f97316;">TailwindCSS</span>
+                                <span
+                                    class="tech-pill px-3 py-1 rounded-full text-xs font-medium"
+                                    style="background: rgba(249,115,22,0.15); color: #f97316;">REST
+                                    API</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-5 rounded-xl border"
+                                style="background: #1a1a1a; border-color: #2a2a2a;">
+                                <div class="text-3xl font-bold mb-1"
+                                    style="color: #f97316;">4+</div>
+                                <div class="text-xs"
+                                    style="color: #a0a0a0;">Tahun
+                                    Pengalaman</div>
+                            </div>
+                            <div class="p-5 rounded-xl border"
+                                style="background: #1a1a1a; border-color: #2a2a2a;">
+                                <div class="text-3xl font-bold mb-1"
+                                    style="color: #f97316;">30+</div>
+                                <div class="text-xs"
+                                    style="color: #a0a0a0;">Project
+                                    Selesai</div>
+                            </div>
+                            <div class="p-5 rounded-xl border"
+                                style="background: #1a1a1a; border-color: #2a2a2a;">
+                                <div class="text-3xl font-bold mb-1"
+                                    style="color: #f97316;">15+</div>
+                                <div class="text-xs"
+                                    style="color: #a0a0a0;">Client Puas</div>
+                            </div>
+                            <div class="p-5 rounded-xl border"
+                                style="background: #1a1a1a; border-color: #2a2a2a;">
+                                <div class="text-3xl font-bold mb-1"
+                                    style="color: #f97316;">99%</div>
+                                <div class="text-xs"
+                                    style="color: #a0a0a0;">Uptime Server</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section id="projects" class="px-6 py-24"
+                style="background: #0a0a0a;">
+                <div class="max-w-6xl mx-auto">
+                    <p class="font-mono text-sm mb-2" style="color: #f97316;">//
+                        Karya Terbaik</p>
+                    <h2 class="text-3xl font-bold mb-12"
+                        style="color: #e8e8e8;">Projects</h2>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Project 1 -->
+                        <div
+                            class="project-card rounded-xl border overflow-hidden"
+                            style="background: #1a1a1a; border-color: #2a2a2a;">
+                            <div class="h-40 flex items-center justify-center"
+                                style="background: linear-gradient(135deg, #1e3a5f 0%, #0f2440 100%);">
+                                <i data-lucide="shopping-cart"
+                                    style="width:48px;height:48px;color:#60a5fa;"></i>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-semibold text-lg mb-2"
+                                    style="color: #e8e8e8;">E-Commerce
+                                    Platform</h3>
+                                <p class="text-sm mb-4"
+                                    style="color: #a0a0a0;">Marketplace lengkap
+                                    dengan payment gateway, multi-vendor, dan
+                                    admin dashboard.</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Laravel</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Vue.js</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Midtrans</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Project 2 -->
+                        <div
+                            class="project-card rounded-xl border overflow-hidden"
+                            style="background: #1a1a1a; border-color: #2a2a2a;">
+                            <div class="h-40 flex items-center justify-center"
+                                style="background: linear-gradient(135deg, #3b1f5e 0%, #1f1035 100%);">
+                                <i data-lucide="layout-dashboard"
+                                    style="width:48px;height:48px;color:#c084fc;"></i>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-semibold text-lg mb-2"
+                                    style="color: #e8e8e8;">SaaS Management
+                                    App</h3>
+                                <p class="text-sm mb-4"
+                                    style="color: #a0a0a0;">Aplikasi manajemen
+                                    proyek dengan real-time collaboration dan
+                                    reporting.</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Laravel</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Livewire</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">WebSocket</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Project 3 -->
+                        <div
+                            class="project-card rounded-xl border overflow-hidden"
+                            style="background: #1a1a1a; border-color: #2a2a2a;">
+                            <div class="h-40 flex items-center justify-center"
+                                style="background: linear-gradient(135deg, #1a4a3a 0%, #0f2e24 100%);">
+                                <i data-lucide="building-2"
+                                    style="width:48px;height:48px;color:#4ade80;"></i>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-semibold text-lg mb-2"
+                                    style="color: #e8e8e8;">ERP System</h3>
+                                <p class="text-sm mb-4"
+                                    style="color: #a0a0a0;">Sistem ERP untuk
+                                    perusahaan manufaktur dengan modul HR,
+                                    inventory, dan finance.</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Laravel</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Filament</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">MySQL</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Project 4 -->
+                        <div
+                            class="project-card rounded-xl border overflow-hidden"
+                            style="background: #1a1a1a; border-color: #2a2a2a;">
+                            <div class="h-40 flex items-center justify-center"
+                                style="background: linear-gradient(135deg, #5a2d1e 0%, #3d1a0f 100%);">
+                                <i data-lucide="smartphone"
+                                    style="width:48px;height:48px;color:#fb923c;"></i>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-semibold text-lg mb-2"
+                                    style="color: #e8e8e8;">REST API
+                                    Backend</h3>
+                                <p class="text-sm mb-4"
+                                    style="color: #a0a0a0;">API backend untuk
+                                    mobile app dengan auth, push notification,
+                                    dan file management.</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Laravel</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Sanctum</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Firebase</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Project 5 -->
+                        <div
+                            class="project-card rounded-xl border overflow-hidden"
+                            style="background: #1a1a1a; border-color: #2a2a2a;">
+                            <div class="h-40 flex items-center justify-center"
+                                style="background: linear-gradient(135deg, #1e3a5f 0%, #2d1b4e 100%);">
+                                <i data-lucide="graduation-cap"
+                                    style="width:48px;height:48px;color:#67e8f9;"></i>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-semibold text-lg mb-2"
+                                    style="color: #e8e8e8;">LMS Platform</h3>
+                                <p class="text-sm mb-4"
+                                    style="color: #a0a0a0;">Learning Management
+                                    System dengan video streaming, quiz, dan
+                                    sertifikasi.</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Laravel</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Inertia.js</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">S3</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Project 6 -->
+                        <div
+                            class="project-card rounded-xl border overflow-hidden"
+                            style="background: #1a1a1a; border-color: #2a2a2a;">
+                            <div class="h-40 flex items-center justify-center"
+                                style="background: linear-gradient(135deg, #4a1942 0%, #2d0f28 100%);">
+                                <i data-lucide="bar-chart-3"
+                                    style="width:48px;height:48px;color:#f472b6;"></i>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-semibold text-lg mb-2"
+                                    style="color: #e8e8e8;">Analytics
+                                    Dashboard</h3>
+                                <p class="text-sm mb-4"
+                                    style="color: #a0a0a0;">Dashboard analytics
+                                    real-time dengan chart interaktif dan
+                                    scheduled report.</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Laravel</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Chart.js</span>
+                                    <span class="px-2 py-0.5 rounded text-xs"
+                                        style="background: #2a2a2a; color: #a0a0a0;">Queue</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact" class="px-6 py-24">
+                <div class="max-w-2xl mx-auto text-center">
+                    <p class="font-mono text-sm mb-2" style="color: #f97316;">//
+                        Mari Berkolaborasi</p>
+                    <h2 class="text-3xl font-bold mb-4"
+                        style="color: #e8e8e8;">Get In Touch</h2>
+                    <p class="mb-8" style="color: #a0a0a0;">Punya ide project?
+                        Saya siap membantu mewujudkannya.</p>
+                    <div
+                        class="flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap">
+                        <a id="contact-email-link"
+                            href="mailto:taufiqjamil47@gmail.com"
+                            class="flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all"
+                            style="background: #f97316; color: #0f0f0f;">
+                            <i data-lucide="mail"
+                                style="width:18px;height:18px;"></i>
+                            <span
+                                id="contact-email-text">taufiqjamil47@gmail.com</span>
+                        </a>
+                        <a href="https://github.com/taufiqjamil47"
+                            target="_blank" rel="noopener noreferrer"
+                            class="flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-sm border transition-all hover:border-orange-500"
+                            style="border-color: #333; color: #e8e8e8;">
+                            <i data-lucide="github"
+                                style="width:18px;height:18px;"></i> GitHub
+                        </a>
+                        <a
+                            href="https://https://www.linkedin.com/in/taufiq-jamil-hanafi-570593158/"
+                            target="_blank" rel="noopener noreferrer"
+                            class="flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-sm border transition-all hover:border-orange-500"
+                            style="border-color: #333; color: #e8e8e8;">
+                            <i data-lucide="linkedin"
+                                style="width:18px;height:18px;"></i> LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="px-6 py-8 border-t" style="border-color: #1a1a1a;">
+                <div class="max-w-6xl mx-auto text-center">
+                    <p class="font-mono text-xs" style="color: #555;">© 2025 —
+                        Built with ❤️ and Laravel</p>
+                </div>
+            </footer>
+        </div>
+        <script>
+            // Inisialisasi Lucide Icons (setelah DOM ready)
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                    lucide.createIcons();
+                } else {
+                    // Fallback jika lucide belum siap
+                    setTimeout(() => {
+                        if (window.lucide && lucide.createIcons) lucide.createIcons();
+                    }, 200);
+                }
+            });
+
+            // Mobile menu toggle
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileBtn && mobileMenu) {
+                mobileBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Smooth scroll untuk semua anchor link
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId === "#" || targetId === "") return;
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        e.preventDefault();
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        // Tutup mobile menu
+                        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+
+            // ========================
+            // Element SDK Integration (diperbaiki agar tidak error)
+            // ========================
+            const defaultConfig = {
+                hero_name: 'Taufiq Jamil Hanafi',
+                hero_tagline: 'Fullstack Laravel Developer',
+                hero_description: 'Membangun aplikasi web yang robust, scalable, dan elegan dengan Laravel, Vue.js, dan teknologi modern lainnya.',
+                about_text: 'Saya adalah seorang fullstack developer dengan keahlian utama di ekosistem Laravel. Berpengalaman lebih dari 4 tahun membangun aplikasi web mulai dari startup hingga enterprise. Fokus pada clean code, performa tinggi, dan user experience yang luar biasa.',
+                contact_email: 'taufiqjamil47@gmail.com',
+                profile_image_url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&h=800&fit=crop',
+                background_color: '#0f0f0f',
+                surface_color: '#1a1a1a',
+                text_color: '#e8e8e8',
+                primary_action_color: '#f97316',
+                secondary_text_color: '#a0a0a0',
+                font_family: 'Sora',
+                font_size: 16
+            };
+
+            function applyConfig(config) {
+                const c = { ...defaultConfig, ...config };
+                const heroNameEl = document.getElementById('hero-name');
+                const heroTaglineEl = document.getElementById('hero-tagline');
+                const heroDescEl = document.getElementById('hero-description');
+                const aboutTextEl = document.getElementById('about-text');
+                const contactEmailSpan = document.getElementById('contact-email-text');
+                const contactLink = document.getElementById('contact-email-link');
+                const bgImage = document.getElementById('profile-image-bg');
+                
+                if (heroNameEl) heroNameEl.textContent = c.hero_name;
+                if (heroTaglineEl) heroTaglineEl.textContent = c.hero_tagline;
+                if (heroDescEl) heroDescEl.textContent = c.hero_description;
+                if (aboutTextEl) aboutTextEl.textContent = c.about_text;
+                if (contactEmailSpan) contactEmailSpan.textContent = c.contact_email;
+                if (contactLink) contactLink.href = 'mailto:' + c.contact_email;
+                if (bgImage && c.profile_image_url) bgImage.src = c.profile_image_url;
+                
+                const appDiv = document.getElementById('app');
+                if (appDiv) {
+                    appDiv.style.backgroundColor = c.background_color;
+                    appDiv.style.color = c.text_color;
+                    appDiv.style.fontFamily = `${c.font_family}, sans-serif`;
+                    appDiv.style.fontSize = c.font_size + 'px';
+                }
+                
+                // update warna tombol/aksen dinamis
+                const primaryBtns = document.querySelectorAll('.pulse-glow');
+                primaryBtns.forEach(btn => {
+                    if (btn.style.background === '#f97316' || btn.style.backgroundColor === 'rgb(249, 115, 22)') {
+                        btn.style.background = c.primary_action_color;
+                    }
+                });
+                const emailBtn = document.getElementById('contact-email-link');
+                if (emailBtn) emailBtn.style.background = c.primary_action_color;
+                const monoElements = document.querySelectorAll('.font-mono');
+                monoElements.forEach(el => {
+                    if (el.style.color === '#f97316' || getComputedStyle(el).color === 'rgb(249, 115, 22)') {
+                        el.style.color = c.primary_action_color;
+                    }
+                });
+            }
+            
+            // Cek apakah SDK element tersedia (tidak error jika tidak)
+            if (typeof window.elementSdk !== 'undefined' && window.elementSdk && typeof window.elementSdk.init === 'function') {
+                window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange: async (config) => { applyConfig(config); },
+                    mapToCapabilities: (config) => ({
+                        recolorables: [
+                            { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+                            { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+                            { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+                            { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+                            { get: () => config.secondary_text_color || defaultConfig.secondary_text_color, set: (v) => { config.secondary_text_color = v; window.elementSdk.setConfig({ secondary_text_color: v }); } }
+                        ],
+                        borderables: [],
+                        fontEditable: {
+                            get: () => config.font_family || defaultConfig.font_family,
+                            set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+                        },
+                        fontSizeable: {
+                            get: () => config.font_size || defaultConfig.font_size,
+                            set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+                        }
+                    }),
+                    mapToEditPanelValues: (config) => new Map([
+                        ['hero_name', config.hero_name || defaultConfig.hero_name],
+                        ['hero_tagline', config.hero_tagline || defaultConfig.hero_tagline],
+                        ['hero_description', config.hero_description || defaultConfig.hero_description],
+                        ['profile_image_url', config.profile_image_url || defaultConfig.profile_image_url],
+                        ['about_text', config.about_text || defaultConfig.about_text],
+                        ['contact_email', config.contact_email || defaultConfig.contact_email]
+                    ])
+                });
+            } else {
+                // Jika SDK tidak ada, tetap jalankan konfigurasi default
+                applyConfig(defaultConfig);
+                console.log("Element SDK not loaded, using default config.");
+            }
+            
+            // Pastikan icon tetap tergambar ulang setelah konten dinamis
+            setTimeout(() => {
+                if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+            }, 300);
+        </script>
+    </body>
+</html>
