@@ -393,6 +393,56 @@
                 </div>
             </div>
 
+            <!-- I. Request Satu Kelaskan -->
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4 pb-2 border-b">I. Request Satu Kelaskan (Opsional)</h2>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-yellow-600"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                Jika ingin anak anda ditempatkan satu kelas dengan teman tertentu, silakan isi form di bawah
+                                ini.
+                                <br>Mohon diisi dengan nama lengkap sesuai data pendaftaran teman yang dimaksud.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Request satu kelas dengan (pisahkan dengan koma)
+                        </label>
+                        <input type="text" name="requested_with_names_raw"
+                            value="{{ old('requested_with_names_raw') }}" class="w-full border rounded px-3 py-2"
+                            placeholder="Contoh: Ahmad Fauzi, Siti Nurhaliza, Budi Santoso">
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle"></i>
+                            Masukkan nama lengkap teman yang diinginkan, pisahkan dengan koma.
+                            Request ini akan diproses oleh admin saat pembagian kelas.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Prioritas Request (Optional)
+                        </label>
+                        <select name="grouping_priority" class="w-full md:w-1/2 border rounded px-3 py-2">
+                            <option value="none" {{ old('grouping_priority') == 'none' ? 'selected' : '' }}>Normal
+                            </option>
+                            <option value="medium" {{ old('grouping_priority') == 'medium' ? 'selected' : '' }}>Prioritas
+                                Sedang</option>
+                            <option value="high" {{ old('grouping_priority') == 'high' ? 'selected' : '' }}>Prioritas
+                                Tinggi</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Prioritas tinggi akan diusahakan lebih dahulu</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="mt-8 flex justify-end space-x-3">
                 <a href="{{ route('pendaftaran.index') }}"
                     class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400">

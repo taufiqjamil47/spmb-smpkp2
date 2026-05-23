@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\GroupingController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatistikController;
@@ -59,6 +60,35 @@ Route::middleware(['auth'])->group(function () {
         Route::get('pendaftaran/{id}/edit', [PendaftaranController::class, 'edit'])->name('pendaftaran.edit');
         Route::put('pendaftaran/{id}', [PendaftaranController::class, 'update'])->name('pendaftaran.update');
         Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
+    });
+
+    // Di web.php, tambahkan dalam group route admin
+    Route::middleware(['role:admin'])->prefix('groupings')->name('groupings.')->group(function () {
+        Route::get('/', [GroupingController::class, 'index'])->name('index');
+        Route::get('/create', [GroupingController::class, 'create'])->name('create');
+        Route::post('/', [GroupingController::class, 'store'])->name('store');
+        Route::get('/{id}', [GroupingController::class, 'show'])->name('show');
+        Route::post('/{id}/approve', [GroupingController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [GroupingController::class, 'reject'])->name('reject');
+        Route::delete('/{id}', [GroupingController::class, 'destroy'])->name('destroy');
+
+        // Bulk actions
+        Route::post('/bulk/approve', [GroupingController::class, 'bulkApprove'])->name('bulk-approve');
+        Route::post('/bulk/reject', [GroupingController::class, 'bulkReject'])->name('bulk-reject');
+
+        // Manage students in grouping
+        Route::post('/{id}/add-student', [GroupingController::class, 'addStudent'])->name('add-student');
+        Route::delete('/{id}/remove-student/{studentId}', [GroupingController::class, 'removeStudent'])->name('remove-student');
+    });
+
+    // Di web.php, tambahkan di dalam group route admin
+
+    Route::middleware(['role:admin'])->group(function () {
+        // ... routes yang sudah ada ...
+
+        // Dashboard API untuk mutual requests
+        Route::get('/dashboard/api/mutual-requests', [DashboardController::class, 'apiMutualRequests'])->name('dashboard.api.mutual');
+        Route::post('/dashboard/api/create-grouping', [DashboardController::class, 'createGroupingFromMutual'])->name('dashboard.create-grouping');
     });
 
     // Routes untuk export (khusus admin)

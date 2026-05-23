@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\GroupingRequest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes; // Tambahkan ini
@@ -71,6 +72,10 @@ class CalonSiswa extends Model
 
         // Data tambahan
         'no_hp_ortu',
+
+        'grouping_request_id',  // TAMBAHKAN
+        'requested_with_names', // TAMBAHKAN
+        'grouping_priority',    // TAMBAHKAN
     ];
 
     protected $dates = ['deleted_at']; // Tambahkan ini
@@ -147,5 +152,52 @@ class CalonSiswa extends Model
     public function scopeKelas($query, $classroomId)
     {
         return $query->where('classroom_id', $classroomId);
+    }
+
+    // Relasi ke grouping request
+    public function groupingRequest()
+    {
+        return $this->belongsTo(GroupingRequest::class);
+    }
+
+    // Get all requested students (dari requested_with_names)
+    public function getRequestedStudentsAttribute()
+    {
+        if (!$this->requested_with_names) {
+            return collect();
+        }
+
+        $names = explode('|', $this->requested_with_names);
+        return CalonSiswa::whereIn('nama_lengkap', $names)
+            ->where('tahun_ajaran_id', $this->tahun_ajaran_id)
+            ->get();
+    }
+
+    // Get formatted requested names
+    public function getFormattedRequestedNamesAttribute()
+    {
+        if (!$this->requested_with_names) {
+            return '-';
+        }
+        return str_replace('|', ', ', $this->requested_with_names);
+    }
+
+    // Check if student has grouping request
+    public function hasGroupingRequest()
+    {
+        return !is_null($this->grouping_request_id) || !empty($this->requested_with_names);
+    }
+
+    // Scope untuk filter berdasarkan grouping status
+    public function scopeHasGroupingRequest($query)
+    {
+        return $query->whereNotNull('grouping_request_id')
+            ->orWhereNotNull('requested_with_names');
+    }
+
+    public function scopeWithoutGrouping($query)
+    {
+        return $query->whereNull('grouping_request_id')
+            ->whereNull('requested_with_names');
     }
 }

@@ -124,6 +124,20 @@
                         <span class="menu-text whitespace-nowrap">Statistik</span>
                     </a>
 
+                    <a href="{{ route('groupings.index') }}"
+                        class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('groupings.*') ? 'bg-blue-700' : '' }} flex items-center">
+                        <i class="fas fa-users mr-3 w-5"></i>
+                        <span class="menu-text whitespace-nowrap">Manajemen Grouping</span>
+                        @php
+                            $pendingCount = \App\Models\GroupingRequest::where('status', 'pending')->count();
+                        @endphp
+                        @if ($pendingCount > 0)
+                            <span class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                                {{ $pendingCount }}
+                            </span>
+                        @endif
+                    </a>
+
                     {{-- <a href="{{ route('users.index') }}"
                         class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('users.*') ? 'bg-blue-700' : '' }} flex items-center">
                         <i class="fas fa-user-cog mr-3 w-5"></i>

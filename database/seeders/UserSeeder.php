@@ -44,5 +44,11 @@ class UserSeeder extends Seeder
             'password' => Hash::make('petugas123'),
             'role' => 'petugas'
         ]);
+        User::create([
+            'name' => 'Risma Fauzia',
+            'email' => 'petugas4@sekolah.com',
+            'password' => Hash::make('petugas123'),
+            'role' => 'petugas'
+        ]);
     }
 }

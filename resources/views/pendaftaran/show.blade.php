@@ -55,6 +55,32 @@
             </div>
         </div>
 
+        @if ($pendaftar->hasGroupingRequest())
+            <div class="my-6 bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                <h3 class="text-lg font-semibold text-indigo-800 mb-2">
+                    <i class="fas fa-users"></i> Informasi Satu Kelaskan
+                </h3>
+
+                @if ($pendaftar->groupingRequest)
+                    <p class="text-sm text-indigo-700">
+                        <strong>Group:</strong> {{ $pendaftar->groupingRequest->group_name }}<br>
+                        <strong>Status:</strong> {!! $pendaftar->groupingRequest->status_badge !!}<br>
+                        <strong>Anggota Group:</strong>
+                    </p>
+                    <ul class="list-disc list-inside ml-4 mt-2">
+                        @foreach ($pendaftar->groupingRequest->students as $student)
+                            <li>{{ $student->nama_lengkap }} ({{ $student->no_peserta }})</li>
+                        @endforeach
+                    </ul>
+                @elseif($pendaftar->requested_with_names)
+                    <p class="text-sm text-indigo-700">
+                        <strong>Meminta satu kelas dengan:</strong> {{ $pendaftar->formatted_requested_names }}<br>
+                        <strong>Status:</strong> Menunggu verifikasi admin
+                    </p>
+                @endif
+            </div>
+        @endif
+
         <!-- A. Data Pribadi -->
         <div class="mb-6">
             <h2 class="text-lg font-semibold bg-blue-50 p-2 mb-4">A. Data Pribadi Calon Siswa</h2>

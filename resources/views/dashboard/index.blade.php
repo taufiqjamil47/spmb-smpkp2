@@ -60,6 +60,214 @@
             </div>
         </div>
     </div>
+    @if (auth()->user()->role === 'admin')
+        <!-- Widget Grouping Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
+                <div class="flex items-center">
+                    <div class="p-3 bg-yellow-100 rounded-full">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">Pending Groups</p>
+                        <p class="text-2xl font-bold">{{ $groupingStats['pendingGroups'] ?? 0 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-full">
+                        <i class="fas fa-user-friends text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">Request Satu Kelas</p>
+                        <p class="text-2xl font-bold">{{ $groupingStats['pendingRequests'] ?? 0 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-100 rounded-full">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">Sudah Dikelompokkan</p>
+                        <p class="text-2xl font-bold">{{ $groupingStats['totalGrouped'] ?? 0 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+                <div class="flex items-center">
+                    <div class="p-3 bg-red-100 rounded-full">
+                        <i class="fas fa-handshake text-red-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-500 text-sm">Mutual Request</p>
+                        <p class="text-2xl font-bold">{{ $groupingStats['mutualDetected'] ?? 0 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auto-Detect Mutual Request Section -->
+        @if (isset($mutualRequests) && count($mutualRequests) > 0)
+            <div class="bg-white rounded-lg shadow mb-8">
+                <div class="border-b px-6 py-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-semibold">
+                            <i class="fas fa-handshake text-green-600 mr-2"></i>
+                            Auto-Detect Mutual Request
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Siswa yang saling meminta satu kelas - segera buat grouping untuk memudahkan pembagian kelas
+                        </p>
+                    </div>
+                    <button onclick="refreshMutualRequests()" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Siswa 1</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Siswa 2</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request Lainnya
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tahun Ajaran
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @foreach ($mutualRequests as $mutual)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium text-gray-900">{{ $mutual['student1']->nama_lengkap }}
+                                        </div>
+                                        <div class="text-xs text-gray-500">No: {{ $mutual['student1']->no_peserta }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium text-gray-900">{{ $mutual['student2']->nama_lengkap }}
+                                        </div>
+                                        <div class="text-xs text-gray-500">No: {{ $mutual['student2']->no_peserta }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        @if (count($mutual['other_names']) > 0)
+                                            {{ implode(', ', $mutual['other_names']) }}
+                                        @else
+                                            <span class="text-gray-400">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        {{ $mutual['student1']->tahunAjaran->tahun_ajaran ?? '-' }}</td>
+                                    <td class="px-6 py-4">
+                                        <button
+                                            onclick="createGroupingFromMutual({{ json_encode([$mutual['student1']->id, $mutual['student2']->id]) }})"
+                                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm">
+                                            <i class="fas fa-users"></i> Buat Grouping
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
+        <!-- Pending Groupings -->
+        @if (isset($pendingGroupings) && $pendingGroupings->count() > 0)
+            <div class="bg-white rounded-lg shadow mb-8">
+                <div class="border-b px-6 py-4">
+                    <h2 class="text-xl font-semibold">
+                        <i class="fas fa-hourglass-half text-yellow-600 mr-2"></i>
+                        Pending Grouping Requests
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">Grouping yang menunggu persetujuan</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode Group</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Group</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Siswa
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal Request
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($pendingGroupings as $group)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-mono text-sm">{{ $group->request_code }}</td>
+                                    <td class="px-6 py-4">{{ $group->group_name }}</td>
+                                    <td class="px-6 py-4">{{ $group->students->count() }} siswa</td>
+                                    <td class="px-6 py-4 text-sm">{{ $group->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="px-6 py-4">
+                                        <a href="{{ route('groupings.show', $group->id) }}"
+                                            class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-eye"></i> Detail
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+        <!-- JavaScript untuk AJAX -->
+        @push('scripts')
+            <script>
+                function refreshMutualRequests() {
+                    fetch('{{ route('dashboard.api.mutual') }}')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload(); // Reload page to show updated data
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+
+                function createGroupingFromMutual(studentIds) {
+                    if (!confirm('Buat grouping untuk siswa-siswa ini? Mereka akan ditempatkan dalam satu grup.')) {
+                        return;
+                    }
+
+                    fetch('{{ route('dashboard.create-grouping') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                student_ids: studentIds
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                alert('Error: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Terjadi kesalahan, silakan coba lagi.');
+                        });
+                }
+            </script>
+        @endpush
+    @endif
 
     @if ($tahunAjaranAktif)
         @php

@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Exports\CalonSiswaCsvExport;
 use App\Exports\CalonSiswaExport;
 use App\Models\CalonSiswa;
+use App\Models\GroupingRequest;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PendaftaranController extends Controller
@@ -98,6 +100,9 @@ class PendaftaranController extends Controller
             'tahun_lahir_ayah' => 'nullable|digits:4',
             'tahun_lahir_ibu' => 'nullable|digits:4',
             'tahun_lahir_wali' => 'nullable|digits:4',
+
+            'requested_with_names_raw' => 'nullable|string|max:500',
+            'grouping_priority' => 'nullable|in:none,medium,high',
         ], [
             'nisn.unique' => 'NISN sudah terdaftar',
             'nik.unique' => 'NIK sudah terdaftar',
@@ -118,6 +123,15 @@ class PendaftaranController extends Controller
         }
 
         $no_peserta = 'PPDB-' . $tahun . '-' . $newNumber;
+
+        // Proses requested names (ubah format dari koma menjadi pipe untuk penyimpanan)
+        $requestedWithNames = null;
+        if ($request->filled('requested_with_names_raw')) {
+            // Hapus spasi berlebih dan ubah ke uppercase
+            $names = array_map('trim', explode(',', $request->requested_with_names_raw));
+            $names = array_map('strtoupper', $names);
+            $requestedWithNames = implode('|', $names);
+        }
 
         // Siapkan data untuk disimpan
         $data = [
@@ -180,10 +194,20 @@ class PendaftaranController extends Controller
 
             // Kontak orang tua
             'no_hp_ortu' => $request->no_hp_ortu,
+            'requested_with_names' => $requestedWithNames,
+            'grouping_priority' => $request->grouping_priority,
         ];
 
         // Simpan data
         $calonSiswa = CalonSiswa::create($data);
+
+        // Buat pending grouping request untuk request satu kelas
+        if ($requestedWithNames) {
+            $this->createPendingGroupingForStudent($calonSiswa, $request->grouping_priority ?? 'high');
+        }
+
+        // Cek apakah ada request yang mutual (saling request)
+        $this->checkMutualRequests($calonSiswa);
 
         return redirect()->route('pendaftaran.show', $calonSiswa->id)
             ->with('success', 'Pendaftaran berhasil! Nomor peserta: ' . $no_peserta);
@@ -634,5 +658,108 @@ class PendaftaranController extends Controller
             },
             'template-import-ppdb.xlsx'
         );
+    }
+
+    private function createPendingGroupingForStudent(CalonSiswa $student, string $priority = 'high')
+    {
+        if (!$student->requested_with_names) {
+            return null;
+        }
+
+        $requestedNames = array_filter(array_map('trim', explode('|', $student->requested_with_names)));
+        if (empty($requestedNames)) {
+            return null;
+        }
+
+        $groupCode = GroupingRequest::generateCode();
+        $groupName = 'Request: ' . $student->nama_lengkap;
+        $notes = 'Request satu kelas dengan: ' . implode(', ', $requestedNames);
+
+        $groupRequest = GroupingRequest::create([
+            'request_code' => $groupCode,
+            'group_name' => $groupName,
+            'tahun_ajaran_id' => $student->tahun_ajaran_id,
+            'status' => 'pending',
+            'notes' => $notes,
+            'created_by' => Auth::id(),
+        ]);
+
+        $student->update([
+            'grouping_request_id' => $groupRequest->id,
+            'grouping_priority' => $priority,
+        ]);
+
+        return $groupRequest;
+    }
+
+    // Tambahkan method helper
+    private function checkMutualRequests($newStudent)
+    {
+        if (!$newStudent->requested_with_names) {
+            return;
+        }
+
+        $requestedNames = array_filter(array_map('trim', explode('|', $newStudent->requested_with_names)));
+        if (empty($requestedNames)) {
+            return;
+        }
+
+        // Cari siswa yang sudah mendaftar dan mutual request
+        $mutualStudents = CalonSiswa::where('tahun_ajaran_id', $newStudent->tahun_ajaran_id)
+            ->where('id', '!=', $newStudent->id)
+            ->where(function ($query) use ($newStudent) {
+                $query->where('requested_with_names', 'like', '%' . $newStudent->nama_lengkap . '%');
+            })
+            ->get();
+
+        if ($mutualStudents->isEmpty()) {
+            return;
+        }
+
+        $groupRequest = null;
+        $existingGroupId = $mutualStudents->pluck('grouping_request_id')->filter()->first();
+        if ($existingGroupId) {
+            $groupRequest = GroupingRequest::where('id', $existingGroupId)
+                ->where('status', 'pending')
+                ->first();
+        }
+
+        if (!$groupRequest && $newStudent->grouping_request_id) {
+            $groupRequest = GroupingRequest::where('id', $newStudent->grouping_request_id)
+                ->where('status', 'pending')
+                ->first();
+        }
+
+        if (!$groupRequest) {
+            $groupCode = GroupingRequest::generateCode();
+            $groupName = 'Mutual Request: ' . $newStudent->nama_lengkap . ' dan kawan2';
+
+            $groupRequest = GroupingRequest::create([
+                'request_code' => $groupCode,
+                'group_name' => $groupName,
+                'tahun_ajaran_id' => $newStudent->tahun_ajaran_id,
+                'status' => 'pending',
+                'notes' => 'Mutual request terdeteksi otomatis oleh sistem',
+                'created_by' => Auth::id(),
+            ]);
+        }
+
+        $studentIds = $mutualStudents->pluck('id')->push($newStudent->id)->unique()->values();
+
+        CalonSiswa::whereIn('id', $studentIds)->update([
+            'grouping_request_id' => $groupRequest->id,
+            'grouping_priority' => 'high',
+            'requested_with_names' => null,
+        ]);
+
+        if (!str_contains($groupRequest->notes, $newStudent->nama_lengkap)) {
+            $groupRequest->notes = trim($groupRequest->notes . ' | ' . $newStudent->nama_lengkap);
+            $groupRequest->save();
+        }
+
+        Log::info('Mutual request detected', [
+            'group_id' => $groupRequest->id,
+            'students' => $studentIds,
+        ]);
     }
 }
