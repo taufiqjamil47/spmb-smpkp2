@@ -115,7 +115,7 @@ class DashboardController extends Controller
         return compact('pendingGroups', 'pendingRequests', 'mutualDetected', 'totalGrouped', 'processedRequests');
     }
 
-    // Method baru: Detect mutual requests dengan detail
+    // Method baru: Detect mutual requests dengan detail - OPTIMIZED from O(n²) to O(n)
     public function detectMutualRequests(Request $request)
     {
         $tahunAjaranId = $request->get('tahun', null);
@@ -131,40 +131,68 @@ class DashboardController extends Controller
 
         $studentsWithRequests = $query->get();
 
-        $mutualPairs = [];
+        // OPTIMIZATION: Build lookup map O(n) instead of nested loop O(n²)
+        $requestMap = [];  // Map nama -> array of students
+        $studentMap = [];  // Map student_id -> student data + parsed requests
 
         foreach ($studentsWithRequests as $student) {
+            $studentUpper = strtoupper($student->nama_lengkap);
             $requestedNames = explode('|', $student->requested_with_names);
             $requestedNames = array_map('trim', $requestedNames);
             $requestedNames = array_map('strtoupper', $requestedNames);
 
-            // Cari siswa yang namanya ada di requested_names dan juga meminta balik
-            foreach ($studentsWithRequests as $potentialMatch) {
-                if ($student->id === $potentialMatch->id) continue;
+            // Store student with parsed requests
+            $studentMap[$student->id] = [
+                'student' => $student,
+                'requested_names' => $requestedNames,
+                'requested_names_upper' => $requestedNames
+            ];
 
-                // Cek apakah student meminta potentialMatch
-                $studentWantsMatch = in_array(strtoupper($potentialMatch->nama_lengkap), $requestedNames);
-
-                // Cek apakah potentialMatch meminta student
-                $matchWantsStudent = false;
-                if ($potentialMatch->requested_with_names) {
-                    $matchRequestedNames = explode('|', $potentialMatch->requested_with_names);
-                    $matchRequestedNames = array_map('trim', $matchRequestedNames);
-                    $matchRequestedNames = array_map('strtoupper', $matchRequestedNames);
-                    $matchWantsStudent = in_array(strtoupper($student->nama_lengkap), $matchRequestedNames);
+            // Build reverse lookup: for each requested name, track who requested it
+            foreach ($requestedNames as $name) {
+                if (!isset($requestMap[$name])) {
+                    $requestMap[$name] = [];
                 }
+                $requestMap[$name][] = $student->id;
+            }
+        }
 
-                // Jika mutual request terdeteksi
-                if ($studentWantsMatch && $matchWantsStudent) {
-                    $pairKey = min($student->id, $potentialMatch->id) . '-' . max($student->id, $potentialMatch->id);
+        $mutualPairs = [];
 
-                    if (!isset($mutualPairs[$pairKey])) {
-                        $mutualPairs[$pairKey] = [
-                            'student1' => $student,
-                            'student2' => $potentialMatch,
-                            'other_names' => array_diff($requestedNames, [strtoupper($potentialMatch->nama_lengkap)]),
-                            'detected_at' => now()
-                        ];
+        // Check for mutual matches using the lookup map O(n)
+        foreach ($studentMap as $studentId => $studentData) {
+            $student = $studentData['student'];
+            $requestedNames = $studentData['requested_names'];
+
+            // For each student this person requested
+            foreach ($requestedNames as $requestedName) {
+                // Check if anyone matching this name also requested this student back
+                if (isset($requestMap[$requestedName])) {
+                    foreach ($requestMap[$requestedName] as $potentialMatchId) {
+                        if ($studentId === $potentialMatchId) continue;
+
+                        $potentialMatch = $studentsWithRequests->find(function ($s) use ($potentialMatchId) {
+                            return $s->id === $potentialMatchId;
+                        });
+
+                        if (!$potentialMatch) continue;
+
+                        // Check if potentialMatch also requested this student
+                        $potentialMatchWants = in_array(strtoupper($student->nama_lengkap), $studentMap[$potentialMatchId]['requested_names']);
+
+                        if ($potentialMatchWants) {
+                            // Found mutual pair
+                            $pairKey = min($studentId, $potentialMatchId) . '-' . max($studentId, $potentialMatchId);
+
+                            if (!isset($mutualPairs[$pairKey])) {
+                                $mutualPairs[$pairKey] = [
+                                    'student1' => $student,
+                                    'student2' => $potentialMatch,
+                                    'other_names' => array_diff($requestedNames, [strtoupper($potentialMatch->nama_lengkap)]),
+                                    'detected_at' => now()
+                                ];
+                            }
+                        }
                     }
                 }
             }

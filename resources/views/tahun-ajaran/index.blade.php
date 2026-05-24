@@ -76,7 +76,7 @@
             <tbody class="divide-y divide-gray-200">
                 @forelse($tahunAjaran as $index => $ta)
                     @php
-                        $terisi = $ta->calonSiswa()->count();
+                        $terisi = $ta->calon_siswa_count; // Use eager-loaded count for better performance
                         $sisa = $ta->kuota - $terisi;
                         $persentase = $ta->kuota > 0 ? round(($terisi / $ta->kuota) * 100) : 0;
 

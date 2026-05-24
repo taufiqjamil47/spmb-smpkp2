@@ -71,6 +71,10 @@ class TahunAjaranController extends Controller
      */
     public function edit(TahunAjaran $tahunAjaran)
     {
+        // Load count if not already loaded (for N+1 prevention in view)
+        if (!isset($tahunAjaran->calon_siswa_count)) {
+            $tahunAjaran->loadCount('calonSiswa');
+        }
         return view('tahun-ajaran.edit', compact('tahunAjaran'));
     }
 
@@ -95,7 +99,8 @@ class TahunAjaranController extends Controller
         ]);
 
         // Cek apakah kuota baru lebih kecil dari jumlah pendaftar yang sudah ada
-        $jumlahPendaftar = $tahunAjaran->calonSiswa()->count();
+        // Use eager-loaded count to prevent N+1 query
+        $jumlahPendaftar = $tahunAjaran->calon_siswa_count ?? $tahunAjaran->calonSiswa()->count();
         if ($request->kuota < $jumlahPendaftar) {
             return back()
                 ->withInput()

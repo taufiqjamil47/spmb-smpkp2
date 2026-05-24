@@ -52,8 +52,8 @@
             <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
                 <h3 class="font-semibold text-yellow-800 mb-2">Informasi:</h3>
                 <ul class="text-sm text-yellow-700 list-disc list-inside">
-                    <li>Total pendaftar saat ini: {{ $tahunAjaran->calonSiswa()->count() }} siswa</li>
-                    <li>Sisa kuota: {{ $tahunAjaran->kuota - $tahunAjaran->calonSiswa()->count() }}</li>
+                    <li>Total pendaftar saat ini: {{ $tahunAjaran->calon_siswa_count }} siswa</li>
+                    <li>Sisa kuota: {{ $tahunAjaran->kuota - $tahunAjaran->calon_siswa_count }}</li>
                     @if ($tahunAjaran->status == 'aktif')
                         <li class="font-bold">Tahun ajaran ini sedang AKTIF</li>
                     @endif

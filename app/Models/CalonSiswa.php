@@ -160,8 +160,22 @@ class CalonSiswa extends Model
         return $this->belongsTo(GroupingRequest::class);
     }
 
-    // Get all requested students (dari requested_with_names)
+    // Get all requested students (dari requested_with_names) - OPTIMIZED: No database query in accessor
     public function getRequestedStudentsAttribute()
+    {
+        if (!$this->requested_with_names) {
+            return collect();
+        }
+
+        $names = explode('|', $this->requested_with_names);
+        $names = array_map('trim', $names);
+        // Return collection of names only, NOT database query
+        // Use getRequestedStudentsWithData() method if you need full student records
+        return collect($names);
+    }
+
+    // Load full student data if needed (use explicitly, not in accessor)
+    public function getRequestedStudentsWithData()
     {
         if (!$this->requested_with_names) {
             return collect();
