@@ -76,8 +76,8 @@ class PendaftaranController extends Controller
         $request->validate([
             // Data wajib
             'nama_lengkap' => 'required|min:3',
-            'nisn' => 'required|unique:calon_siswas,nisn',
-            'nik' => 'required|unique:calon_siswas,nik',
+            'nisn' => 'required|max:10|unique:calon_siswas,nisn',
+            'nik' => 'required|max:16|unique:calon_siswas,nik',
             'tempat_lahir' => 'required',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required',
@@ -106,6 +106,8 @@ class PendaftaranController extends Controller
         ], [
             'nisn.unique' => 'NISN sudah terdaftar',
             'nik.unique' => 'NIK sudah terdaftar',
+            'nisn.max' => 'NISN tidak boleh lebih dari 10 karakter',
+            'nik.max' => 'NIK tidak boleh lebih dari 16 karakter',
         ]);
 
         // Generate nomor peserta otomatis
@@ -122,7 +124,7 @@ class PendaftaranController extends Controller
             $newNumber = '0001';
         }
 
-        $no_peserta = 'PPDB-' . $tahun . '-' . $newNumber;
+        $no_peserta = 'SPMBKP2-' . $tahun . '-' . $newNumber;
 
         // Proses requested names (ubah format dari koma menjadi pipe untuk penyimpanan)
         $requestedWithNames = null;
@@ -175,19 +177,19 @@ class PendaftaranController extends Controller
             'pip' => $request->pip,
 
             // Ayah
-            'nama_ayah' => $request->nama_ayah,
+            'nama_ayah' => strtoupper($request->nama_ayah),
             'tahun_lahir_ayah' => $request->tahun_lahir_ayah,
             'pekerjaan_ayah' => $request->pekerjaan_ayah,
             'pendidikan_ayah' => $request->pendidikan_ayah,
 
             // Ibu
-            'nama_ibu' => $request->nama_ibu,
+            'nama_ibu' => strtoupper($request->nama_ibu),
             'tahun_lahir_ibu' => $request->tahun_lahir_ibu,
             'pekerjaan_ibu' => $request->pekerjaan_ibu,
             'pendidikan_ibu' => $request->pendidikan_ibu,
 
             // Wali
-            'nama_wali' => $request->nama_wali,
+            'nama_wali' => strtoupper($request->nama_wali),
             'tahun_lahir_wali' => $request->tahun_lahir_wali,
             'pekerjaan_wali' => $request->pekerjaan_wali,
             'pendidikan_wali' => $request->pendidikan_wali,
@@ -251,8 +253,8 @@ class PendaftaranController extends Controller
         $request->validate([
             // Data wajib
             'nama_lengkap' => 'required|min:3',
-            'nisn' => 'required|unique:calon_siswas,nisn,' . $id,
-            'nik' => 'required|unique:calon_siswas,nik,' . $id,
+            'nisn' => 'required|max:10|unique:calon_siswas,nisn,' . $id,
+            'nik' => 'required|max:16|unique:calon_siswas,nik,' . $id,
             'tempat_lahir' => 'required',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required',
@@ -319,19 +321,19 @@ class PendaftaranController extends Controller
             'pip' => $request->pip,
 
             // Ayah
-            'nama_ayah' => $request->nama_ayah,
+            'nama_ayah' => strtoupper($request->nama_ayah),
             'tahun_lahir_ayah' => $request->tahun_lahir_ayah,
             'pekerjaan_ayah' => $request->pekerjaan_ayah,
             'pendidikan_ayah' => $request->pendidikan_ayah,
 
             // Ibu
-            'nama_ibu' => $request->nama_ibu,
+            'nama_ibu' => strtoupper($request->nama_ibu),
             'tahun_lahir_ibu' => $request->tahun_lahir_ibu,
             'pekerjaan_ibu' => $request->pekerjaan_ibu,
             'pendidikan_ibu' => $request->pendidikan_ibu,
 
             // Wali
-            'nama_wali' => $request->nama_wali,
+            'nama_wali' => strtoupper($request->nama_wali),
             'tahun_lahir_wali' => $request->tahun_lahir_wali,
             'pekerjaan_wali' => $request->pekerjaan_wali,
             'pendidikan_wali' => $request->pendidikan_wali,

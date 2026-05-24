@@ -186,6 +186,15 @@ class DashboardController extends Controller
         ]);
     }
 
+    // API endpoint untuk total siswa secara real-time
+    public function apiTotalStudents()
+    {
+        return response()->json([
+            'success' => true,
+            'total' => CalonSiswa::count(),
+        ]);
+    }
+
     // API endpoint untuk create grouping dari mutual request
     public function createGroupingFromMutual(Request $request)
     {

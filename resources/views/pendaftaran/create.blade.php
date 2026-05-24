@@ -403,7 +403,8 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
-                                Jika ingin anak anda ditempatkan satu kelas dengan teman tertentu, silakan isi form di bawah
+                                Jika didapati anak ingin ditempatkan satu kelas dengan teman tertentu, silakan isi form di
+                                bawah
                                 ini.
                                 <br>Mohon diisi dengan nama lengkap sesuai data pendaftaran teman yang dimaksud.
                             </p>

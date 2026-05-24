@@ -69,7 +69,7 @@
                         <i class="fas fa-clock text-yellow-600 text-xl"></i>
                     </div>
                     <div class="ml-4">
-                        <p class="text-gray-500 text-sm">Pending Groups</p>
+                        <p class="text-gray-500 text-sm">Pending Request</p>
                         <p class="text-2xl font-bold">{{ $groupingStats['pendingGroups'] ?? 0 }}</p>
                     </div>
                 </div>
