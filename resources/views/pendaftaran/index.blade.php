@@ -73,11 +73,11 @@
 
                                 <div class="border-t my-2"></div>
 
-                                <a href="{{ route('export.template') }}"
+                                {{-- <a href="{{ route('export.template') }}"
                                     class="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center text-sm">
                                     <i class="fas fa-file-import text-yellow-600 w-5 mr-2"></i>
                                     Download Template Import
-                                </a>
+                                </a> --}}
                             </div>
 
                             <div class="p-2 border-t bg-gray-50 rounded-b-lg">
@@ -139,7 +139,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NISN</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Asal Sekolah</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tahun Ajaran</th>
+                    {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tahun Ajaran</th> --}}
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Daftar</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                 </tr>
@@ -152,7 +152,7 @@
                         <td class="px-6 py-4">{{ $siswa->nama_lengkap }}</td>
                         <td class="px-6 py-4">{{ $siswa->nisn }}</td>
                         <td class="px-6 py-4">{{ $siswa->sekolah_asal }}</td>
-                        <td class="px-6 py-4">{{ $siswa->tahunAjaran->tahun_ajaran ?? '-' }}</td>
+                        {{-- <td class="px-6 py-4">{{ $siswa->tahunAjaran->tahun_ajaran ?? '-' }}</td> --}}
                         <td class="px-6 py-4">{{ $siswa->created_at->format('d/m/Y') }}</td>
                         <td class="px-6 py-4">
                             <div class="flex space-x-2">

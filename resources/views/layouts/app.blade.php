@@ -79,7 +79,7 @@
         @include('layouts.navigation')
 
         <!-- Main Content -->
-        <div class="flex-1 p-8 transition-all duration-300" id="mainContent">
+        <div class="flex-1 p-8 pt-16 transition-all duration-300" id="mainContent">
 
             @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

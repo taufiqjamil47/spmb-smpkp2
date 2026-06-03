@@ -537,7 +537,7 @@ class PendaftaranController extends Controller
         $tahunAjaranId = $request->tahun;
         $status = $request->status; // 'aktif', 'trash', 'all'
 
-        $fileName = 'data-pendaftar-ppdb';
+        $fileName = 'pendaftar-spmb-kp2';
 
         // Tambahkan info tahun ke nama file
         if ($tahunAjaranId) {
@@ -573,7 +573,7 @@ class PendaftaranController extends Controller
         $tahunAjaranId = $request->tahun;
         $status = $request->status;
 
-        $fileName = 'data-pendaftar-ppdb';
+        $fileName = 'pendaftar-spmb-kp2';
 
         if ($tahunAjaranId) {
             $tahun = TahunAjaran::find($tahunAjaranId);

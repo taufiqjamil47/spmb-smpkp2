@@ -107,7 +107,7 @@ class CalonSiswaExport extends DefaultValueBinder implements FromCollection, Wit
         $column = $cell->getColumn();
 
         // Kolom C (NISN) dan D (NIK) sebagai text
-        if (in_array($column, ['C', 'D'])) {
+        if (in_array($column, ['C', 'D', 'W', 'X', 'Y'])) {
             $cell->setValueExplicit($value, DataType::TYPE_STRING);
             return true;
         }
@@ -194,6 +194,9 @@ class CalonSiswaExport extends DefaultValueBinder implements FromCollection, Wit
         return [
             'C' => NumberFormat::FORMAT_TEXT,
             'D' => NumberFormat::FORMAT_TEXT,
+            'W' => NumberFormat::FORMAT_TEXT,
+            'X' => NumberFormat::FORMAT_TEXT,
+            'Y' => NumberFormat::FORMAT_TEXT,
         ];
     }
 

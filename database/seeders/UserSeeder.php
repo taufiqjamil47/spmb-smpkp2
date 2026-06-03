@@ -15,39 +15,39 @@ class UserSeeder extends Seeder
     {
         User::create([
             'name' => 'Taufiq Jamil Hanafi',
-            'email' => 'admin1@sekolah.com',
+            'email' => 'taufiqjamil@sekolah.smp.com',
             'password' => Hash::make('admin123'),
             'role' => 'admin'
         ]);
 
         User::create([
             'name' => 'Candra Pardiana',
-            'email' => 'admin2@sekolah.com',
+            'email' => 'candrapardiana@sekolah.smp.com',
             'password' => Hash::make('admin123'),
             'role' => 'admin'
         ]);
         User::create([
             'name' => 'Yernawati',
-            'email' => 'petugas1@sekolah.com',
-            'password' => Hash::make('petugas123'),
+            'email' => 'yernawati@sekolah.smp.com',
+            'password' => Hash::make('admin123'),
             'role' => 'petugas'
         ]);
         User::create([
             'name' => 'Tiara Azizah',
-            'email' => 'petugas2@sekolah.com',
-            'password' => Hash::make('petugas123'),
+            'email' => 'tiaraazizah@sekolah.smp.com',
+            'password' => Hash::make('admin123'),
             'role' => 'petugas'
         ]);
         User::create([
             'name' => 'Muhammad Azizan',
-            'email' => 'petugas3@sekolah.com',
-            'password' => Hash::make('petugas123'),
+            'email' => 'muhammadazizan@sekolah.smp.com',
+            'password' => Hash::make('admin123'),
             'role' => 'petugas'
         ]);
         User::create([
             'name' => 'Risma Fauzia',
-            'email' => 'petugas4@sekolah.com',
-            'password' => Hash::make('petugas123'),
+            'email' => 'rismafauzia@sekolah.smp.com',
+            'password' => Hash::make('admin123'),
             'role' => 'petugas'
         ]);
     }
