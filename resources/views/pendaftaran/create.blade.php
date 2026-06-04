@@ -11,6 +11,17 @@
     </div>
 
     <div class="bg-white rounded-lg shadow p-6">
+        @if ($errors->any())
+            <div class="mb-6 rounded border border-red-200 bg-red-50 p-4 text-red-700">
+                <p class="font-semibold">Ada beberapa kesalahan pada input Anda:</p>
+                <ul class="list-disc list-inside mt-2 text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form action="{{ route('pendaftaran.store') }}" method="POST">
             @csrf
 
@@ -34,7 +45,9 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">NISN <span
                                 class="text-red-500">*</span></label>
                         <input type="text" name="nisn" value="{{ old('nisn') }}"
-                            class="w-full border rounded px-3 py-2 @error('nisn') border-red-500 @enderror" required>
+                            class="w-full border rounded px-3 py-2 @error('nisn') border-red-500 @enderror" required
+                            maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric"
+                            placeholder="10 digit angka">
                         @error('nisn')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -44,7 +57,9 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">NIK <span
                                 class="text-red-500">*</span></label>
                         <input type="text" name="nik" value="{{ old('nik') }}"
-                            class="w-full border rounded px-3 py-2 @error('nik') border-red-500 @enderror" required>
+                            class="w-full border rounded px-3 py-2 @error('nik') border-red-500 @enderror" required
+                            maxlength="16" minlength="16" pattern="[0-9]{16}" inputmode="numeric"
+                            placeholder="16 digit angka">
                         @error('nik')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -128,15 +143,27 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Siswa</label>
-                        <input type="text" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}"
-                            class="w-full border rounded px-3 py-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Siswa <span
+                                class="text-red-500">*</span></label>
+                        <input type="tel" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}"
+                            class="w-full border rounded px-3 py-2 @error('no_hp_siswa') border-red-500 @enderror" required
+                            minlength="9" maxlength="16" pattern="[0-9+ ]{9,16}" inputmode="tel" autocomplete="tel"
+                            placeholder="Contoh: 081234567890">
+                        @error('no_hp_siswa')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon Rumah</label>
-                        <input type="text" name="no_telp" value="{{ old('no_telp') }}"
-                            class="w-full border rounded px-3 py-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon Rumah <span
+                                class="text-red-500">*</span></label>
+                        <input type="tel" name="no_telp" value="{{ old('no_telp') }}"
+                            class="w-full border rounded px-3 py-2 @error('no_telp') border-red-500 @enderror" required
+                            minlength="9" maxlength="16" pattern="[0-9+ ()-]{9,16}" inputmode="tel" autocomplete="tel"
+                            placeholder="Contoh: (021) 1234567">
+                        @error('no_telp')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -387,8 +414,13 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Orang Tua/Wali <span
                                 class="text-red-500">*</span></label>
-                        <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}"
-                            class="w-full border rounded px-3 py-2" required>
+                        <input type="tel" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}"
+                            class="w-full border rounded px-3 py-2 @error('no_hp_ortu') border-red-500 @enderror" required
+                            minlength="9" maxlength="16" pattern="[0-9+ ]{9,16}" inputmode="tel" autocomplete="tel"
+                            placeholder="Contoh: 081234567890">
+                        @error('no_hp_ortu')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>

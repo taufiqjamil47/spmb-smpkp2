@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
+        $middleware->appendToGroup('web', [\App\Http\Middleware\CheckDatabase::class]);
+        $middleware->api(prepend: [\App\Http\Middleware\CheckDatabase::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

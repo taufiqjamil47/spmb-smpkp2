@@ -76,8 +76,8 @@ class PendaftaranController extends Controller
         $request->validate([
             // Data wajib
             'nama_lengkap' => 'required|min:3',
-            'nisn' => 'required|max:10|unique:calon_siswas,nisn',
-            'nik' => 'required|max:16|unique:calon_siswas,nik',
+            'nisn' => 'required|digits:10|unique:calon_siswas,nisn',
+            'nik' => 'required|digits:16|unique:calon_siswas,nik',
             'tempat_lahir' => 'required',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required',
@@ -87,6 +87,8 @@ class PendaftaranController extends Controller
             'tahun_lulus' => 'required|digits:4',
             'nama_ayah' => 'required',
             'nama_ibu' => 'required',
+            'no_hp_siswa' => 'required',
+            'no_telp' => 'required',
             'no_hp_ortu' => 'required',
 
             // Validasi numerik
@@ -106,8 +108,11 @@ class PendaftaranController extends Controller
         ], [
             'nisn.unique' => 'NISN sudah terdaftar',
             'nik.unique' => 'NIK sudah terdaftar',
-            'nisn.max' => 'NISN tidak boleh lebih dari 10 karakter',
-            'nik.max' => 'NIK tidak boleh lebih dari 16 karakter',
+            'nisn.digits' => 'NISN harus berupa 10 digit angka.',
+            'nik.digits' => 'NIK harus berupa 16 digit angka.',
+            'no_hp_siswa.required' => 'No. HP Siswa wajib diisi.',
+            'no_telp.required' => 'No. Telepon Rumah wajib diisi.',
+            'no_hp_ortu.required' => 'No. HP Orang Tua/Wali wajib diisi.',
         ]);
 
         // Generate nomor peserta otomatis
@@ -118,10 +123,10 @@ class PendaftaranController extends Controller
             ->first();
 
         if ($lastSiswa) {
-            $lastNumber = intval(substr($lastSiswa->no_peserta, -4));
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+            $lastNumber = intval(substr($lastSiswa->no_peserta, -3));
+            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
         } else {
-            $newNumber = '0001';
+            $newNumber = '001';
         }
 
         $no_peserta = 'SPMBKP2-' . $tahun . '-' . $newNumber;
