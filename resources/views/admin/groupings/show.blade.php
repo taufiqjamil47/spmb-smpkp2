@@ -3,200 +3,352 @@
 @section('title', 'Detail Grouping Request')
 
 @section('content')
-    <div class="mb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-3xl font-bold">Detail Grouping</h1>
-            <p class="text-gray-600">Kode: {{ $grouping->request_code }}</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="{{ route('groupings.index') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
-                <i class="fas fa-arrow-left"></i> Kembali
-            </a>
-
-            @if ($grouping->status == 'pending')
-                <form action="{{ route('groupings.approve', $grouping->id) }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                        <i class="fas fa-check"></i> Setujui
-                    </button>
-                </form>
-
-                <form action="{{ route('groupings.reject', $grouping->id) }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                        <i class="fas fa-times"></i> Tolak
-                    </button>
-                </form>
-            @endif
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Info Grouping -->
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold mb-4 border-b pb-2">Informasi Grup</h2>
-
-                <div class="space-y-3">
+    <div class="div mt-8">
+        <!-- Header Section with Gradient -->
+        <div
+            class="mb-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+            {{-- <div class="absolute top-0 right-0 opacity-10">
+                <svg class="w-64 h-64" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L15 8.5L22 9.5L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9.5L9 8.5L12 2Z" />
+                </svg>
+            </div> --}}
+            <div class="relative z-10">
+                <div class="flex justify-between items-center flex-wrap gap-4">
                     <div>
-                        <label class="text-sm text-gray-500">Nama Grup</label>
-                        <p class="font-medium">{{ $grouping->group_name }}</p>
-                    </div>
-
-                    <div>
-                        <label class="text-sm text-gray-500">Kode Grup</label>
-                        <p class="font-mono text-sm">{{ $grouping->request_code }}</p>
-                    </div>
-
-                    <div>
-                        <label class="text-sm text-gray-500">Status</label>
-                        <div>
-                            @if ($grouping->status == 'pending')
-                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                                    <i class="fas fa-clock mr-1"></i> Pending
-                                </span>
-                            @elseif($grouping->status == 'approved')
-                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                                    <i class="fas fa-check mr-1"></i> Disetujui
-                                </span>
-                            @elseif($grouping->status == 'rejected')
-                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
-                                    <i class="fas fa-times mr-1"></i> Ditolak
-                                </span>
-                            @else
-                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                                    <i class="fas fa-spinner mr-1"></i> Diproses
-                                </span>
-                            @endif
+                        <h1 class="text-3xl font-bold mb-2">Detail Grouping</h1>
+                        <div class="flex items-center space-x-3">
+                            <p class="text-purple-100">Kode Request:</p>
+                            <span
+                                class="font-mono font-semibold bg-white bg-opacity-20 px-3 py-1 rounded-lg">{{ $grouping->request_code }}</span>
                         </div>
                     </div>
+                    <div class="flex gap-3">
+                        <a href="{{ route('groupings.index') }}"
+                            class="bg-white text-purple-600 px-5 py-2.5 rounded-xl hover:bg-gray-100 transition-all font-medium shadow-md hover:shadow-lg flex items-center">
+                            <i class="fas fa-arrow-left mr-2"></i>Kembali
+                        </a>
 
-                    <div>
-                        <label class="text-sm text-gray-500">Tahun Ajaran</label>
-                        <p>{{ $grouping->tahunAjaran->tahun_ajaran ?? '-' }}</p>
+                        @if ($grouping->status == 'pending')
+                            <form action="{{ route('groupings.approve', $grouping->id) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
+                                    <i class="fas fa-check mr-2"></i> Setujui
+                                </button>
+                            </form>
+
+                            <form action="{{ route('groupings.reject', $grouping->id) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="bg-gradient-to-r from-red-500 to-red-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
+                                    <i class="fas fa-times mr-2"></i> Tolak
+                                </button>
+                            </form>
+                        @endif
                     </div>
-
-                    <div>
-                        <label class="text-sm text-gray-500">Dibuat</label>
-                        <p>{{ $grouping->created_at->format('d/m/Y H:i') }} oleh {{ $grouping->creator->name ?? 'Sistem' }}
-                        </p>
-                    </div>
-
-                    @if ($grouping->approved_at)
-                        <div>
-                            <label class="text-sm text-gray-500">Disetujui</label>
-                            <p>{{ $grouping->approved_at->format('d/m/Y H:i') }} oleh
-                                {{ $grouping->approver->name ?? '-' }}</p>
-                        </div>
-                    @endif
-
-                    @if ($grouping->notes)
-                        <div>
-                            <label class="text-sm text-gray-500">Catatan</label>
-                            <p class="text-sm bg-gray-50 p-2 rounded">{{ $grouping->notes }}</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Tambah Siswa (opsional) -->
-            @if ($grouping->status != 'rejected' && isset($availableStudents) && $availableStudents->count() > 0)
-                <div class="bg-white rounded-lg shadow p-6 mt-6">
-                    <h2 class="text-lg font-semibold mb-4 border-b pb-2">Tambah Siswa</h2>
-                    <form action="{{ route('groupings.add-student', $grouping->id) }}" method="POST">
-                        @csrf
-                        <select name="student_id" class="w-full border rounded px-3 py-2 mb-3" required>
-                            <option value="">Pilih siswa...</option>
-                            @foreach ($availableStudents as $student)
-                                <option value="{{ $student->id }}">{{ $student->nama_lengkap }}
-                                    ({{ $student->no_peserta }})</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                            <i class="fas fa-plus"></i> Tambahkan ke Grup
-                        </button>
-                    </form>
-                </div>
-            @endif
-        </div>
-
-        <!-- Daftar Siswa -->
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-lg shadow">
-                <div class="border-b px-6 py-4">
-                    <h2 class="text-lg font-semibold">
-                        <i class="fas fa-users mr-2"></i>
-                        Daftar Siswa dalam Grup ({{ $grouping->students->count() }})
-                    </h2>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Peserta</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Lengkap
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NISN</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prioritas</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            @forelse($grouping->students as $student)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-mono text-sm">{{ $student->no_peserta }}</td>
-                                    <td class="px-6 py-4">
-                                        <div class="font-medium">{{ $student->nama_lengkap }}</div>
-                                        <div class="text-xs text-gray-500">{{ $student->tempat_lahir }},
-                                            {{ \Carbon\Carbon::parse($student->tanggal_lahir)->format('d/m/Y') }}</div>
-                                    </td>
-                                    <td class="px-6 py-4">{{ $student->nisn }}</td>
-                                    <td class="px-6 py-4">
-                                        @if ($student->grouping_priority == 'high')
-                                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Prioritas
-                                                Tinggi</span>
-                                        @elseif($student->grouping_priority == 'medium')
-                                            <span
-                                                class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Prioritas
-                                                Sedang</span>
-                                        @else
-                                            <span
-                                                class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Normal</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <a href="{{ route('pendaftaran.show', $student->id) }}"
-                                            class="text-blue-600 hover:text-blue-800 mr-2">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-
-                                        @if ($grouping->status != 'approved')
-                                            <form
-                                                action="{{ route('groupings.remove-student', [$grouping->id, $student->id]) }}"
-                                                method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-800"
-                                                    onclick="return confirm('Keluarkan siswa dari grup ini?')">
-                                                    <i class="fas fa-user-minus"></i>
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                                        <i class="fas fa-users-slash text-4xl mb-2"></i>
-                                        <p>Belum ada siswa dalam grup ini</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Info Grouping -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden sticky top-6">
+                    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-4 border-b border-purple-100">
+                        <h2 class="text-lg font-bold text-gray-800">
+                            <i class="fas fa-info-circle text-purple-500 mr-2"></i>
+                            Informasi Grup
+                        </h2>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <label class="text-xs text-gray-500 uppercase tracking-wider block mb-1">
+                                <i class="fas fa-tag mr-1"></i> Nama Grup
+                            </label>
+                            <p class="font-semibold text-gray-800 text-lg">{{ $grouping->group_name }}</p>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <label class="text-xs text-gray-500 uppercase tracking-wider block mb-1">
+                                <i class="fas fa-qrcode mr-1"></i> Kode Grup
+                            </label>
+                            <p
+                                class="font-mono text-sm font-semibold text-purple-600 bg-purple-100 inline-block px-3 py-1 rounded-lg">
+                                {{ $grouping->request_code }}</p>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <label class="text-xs text-gray-500 uppercase tracking-wider block mb-1">
+                                <i class="fas fa-flag-checkered mr-1"></i> Status
+                            </label>
+                            <div>
+                                @if ($grouping->status == 'pending')
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-clock mr-1"></i> Pending
+                                    </span>
+                                @elseif($grouping->status == 'approved')
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i> Disetujui
+                                    </span>
+                                @elseif($grouping->status == 'rejected')
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">
+                                        <i class="fas fa-times-circle mr-1"></i> Ditolak
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        <i class="fas fa-spinner mr-1"></i> Diproses
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <label class="text-xs text-gray-500 uppercase tracking-wider block mb-1">
+                                <i class="fas fa-calendar-alt mr-1"></i> Tahun Ajaran
+                            </label>
+                            <p class="font-medium text-gray-800">{{ $grouping->tahunAjaran->tahun_ajaran ?? '-' }}</p>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-3">
+                            <label class="text-xs text-gray-500 uppercase tracking-wider block mb-1">
+                                <i class="fas fa-user-plus mr-1"></i> Dibuat
+                            </label>
+                            <div class="flex flex-col">
+                                <span class="text-sm text-gray-800">{{ $grouping->created_at->format('d/m/Y H:i') }}</span>
+                                <span class="text-xs text-gray-500">oleh {{ $grouping->creator->name ?? 'Sistem' }}</span>
+                            </div>
+                        </div>
+
+                        @if ($grouping->approved_at)
+                            <div class="bg-gray-50 rounded-xl p-3">
+                                <label class="text-xs text-gray-500 uppercase tracking-wider block mb-1">
+                                    <i class="fas fa-user-check mr-1"></i> Disetujui
+                                </label>
+                                <div class="flex flex-col">
+                                    <span
+                                        class="text-sm text-gray-800">{{ $grouping->approved_at->format('d/m/Y H:i') }}</span>
+                                    <span class="text-xs text-gray-500">oleh {{ $grouping->approver->name ?? '-' }}</span>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($grouping->notes)
+                            <div class="bg-yellow-50 rounded-xl p-3 border-l-4 border-yellow-400">
+                                <label class="text-xs text-yellow-700 uppercase tracking-wider block mb-1">
+                                    <i class="fas fa-sticky-note mr-1"></i> Catatan
+                                </label>
+                                <p class="text-sm text-yellow-800">{{ $grouping->notes }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Tambah Siswa (opsional) -->
+                @if ($grouping->status != 'rejected' && isset($availableStudents) && $availableStudents->count() > 0)
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mt-6">
+                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-4 border-b border-blue-100">
+                            <h2 class="text-lg font-bold text-gray-800">
+                                <i class="fas fa-user-plus text-blue-500 mr-2"></i>
+                                Tambah Siswa
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <form action="{{ route('groupings.add-student', $grouping->id) }}" method="POST">
+                                @csrf
+                                <div class="relative mb-4">
+                                    <i
+                                        class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <select name="student_id"
+                                        class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white cursor-pointer"
+                                        required>
+                                        <option value="">Pilih siswa...</option>
+                                        @foreach ($availableStudents as $student)
+                                            <option value="{{ $student->id }}">{{ $student->nama_lengkap }}
+                                                ({{ $student->no_peserta }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <i
+                                        class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                </div>
+                                <button type="submit"
+                                    class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-3 rounded-xl hover:shadow-lg transition-all font-medium">
+                                    <i class="fas fa-plus mr-2"></i> Tambahkan ke Grup
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Daftar Siswa -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-4 border-b border-purple-100">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-800">
+                                <i class="fas fa-users text-purple-500 mr-2"></i>
+                                Daftar Siswa dalam Grup
+                            </h2>
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                {{ $grouping->students->count() }} siswa
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr class="bg-gradient-to-r from-gray-50 to-gray-100">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        No. Peserta</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Nama Lengkap</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        NISN</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Prioritas</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse($grouping->students as $student)
+                                    <tr class="hover:bg-purple-50 transition-colors group">
+                                        <td class="px-6 py-4">
+                                            <span
+                                                class="font-mono text-sm font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded-lg">{{ $student->no_peserta }}</span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="font-semibold text-gray-900">{{ $student->nama_lengkap }}</div>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                                {{ $student->tempat_lahir }},
+                                                {{ \Carbon\Carbon::parse($student->tanggal_lahir)->format('d/m/Y') }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 font-mono text-sm text-gray-700">{{ $student->nisn }}</td>
+                                        <td class="px-6 py-4">
+                                            @if ($student->grouping_priority == 'high')
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                                    <i class="fas fa-arrow-up mr-1"></i> Prioritas Tinggi
+                                                </span>
+                                            @elseif($student->grouping_priority == 'medium')
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                    <i class="fas fa-minus mr-1"></i> Prioritas Sedang
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
+                                                    <i class="fas fa-circle mr-1 text-gray-400"></i> Normal
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="flex space-x-2">
+                                                <a href="{{ route('pendaftaran.show', $student->id) }}"
+                                                    class="text-blue-600 hover:text-white hover:bg-blue-600 p-2 rounded-lg transition-all"
+                                                    title="Lihat Detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+
+                                                @if ($grouping->status != 'approved')
+                                                    <form
+                                                        action="{{ route('groupings.remove-student', [$grouping->id, $student->id]) }}"
+                                                        method="POST" class="inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
+                                                            onclick="return confirm('Keluarkan siswa dari grup ini?')"
+                                                            title="Keluarkan dari Grup">
+                                                            <i class="fas fa-user-minus"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-16 text-center">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <div
+                                                    class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                    <i class="fas fa-users-slash text-gray-400 text-3xl"></i>
+                                                </div>
+                                                <h3 class="text-lg font-semibold text-gray-700 mb-2">Belum Ada Siswa</h3>
+                                                <p class="text-sm text-gray-500">Belum ada siswa dalam grup ini</p>
+                                                @if ($grouping->status != 'rejected' && isset($availableStudents) && $availableStudents->count() > 0)
+                                                    <p class="text-xs text-gray-400 mt-2">Gunakan form di samping untuk
+                                                        menambahkan siswa</p>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    @push('scripts')
+        <script>
+            // SweetAlert confirmation for approve and reject
+            document.querySelectorAll('form[action*="approve"]').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Setujui Grouping?',
+                        text: 'Grouping yang disetujui akan digunakan dalam pembagian kelas',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10B981',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Setujui!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
+                });
+            });
+
+            document.querySelectorAll('form[action*="reject"]').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Tolak Grouping?',
+                        text: 'Grouping yang ditolak tidak akan digunakan',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Tolak!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submit();
+                        }
+                    });
+                });
+            });
+        </script>
+    @endpush
 @endsection
