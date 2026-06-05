@@ -142,19 +142,7 @@
                             class="w-full border rounded px-3 py-2">
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Siswa <span
-                                class="text-red-500">*</span></label>
-                        <input type="tel" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}"
-                            class="w-full border rounded px-3 py-2 @error('no_hp_siswa') border-red-500 @enderror" required
-                            minlength="9" maxlength="16" pattern="[0-9+ ]{9,16}" inputmode="tel" autocomplete="tel"
-                            placeholder="Contoh: 081234567890">
-                        @error('no_hp_siswa')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
+                    {{-- <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon Rumah <span
                                 class="text-red-500">*</span></label>
                         <input type="tel" name="no_telp" value="{{ old('no_telp') }}"
@@ -164,7 +152,7 @@
                         @error('no_telp')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
@@ -410,6 +398,25 @@
                             @endforeach
                         </select>
                     </div>
+                </div>
+            </div>
+
+            <!-- No untuk dihubungi -->
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4 pb-2 border-b">I. Nomor Kontak (Wajib)</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Siswa <span
+                                class="text-red-500">*</span></label>
+                        <input type="tel" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}"
+                            class="w-full border rounded px-3 py-2 @error('no_hp_siswa') border-red-500 @enderror" required
+                            minlength="9" maxlength="16" pattern="[0-9+ ]{9,16}" inputmode="tel" autocomplete="tel"
+                            placeholder="Contoh: 081234567890">
+                        @error('no_hp_siswa')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Orang Tua/Wali <span
@@ -427,7 +434,7 @@
 
             <!-- I. Request Satu Kelaskan -->
             <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-4 pb-2 border-b">I. Request Satu Kelaskan (Opsional)</h2>
+                <h2 class="text-xl font-semibold mb-4 pb-2 border-b">J. Request Satu Kelaskan (Opsional)</h2>
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
                     <div class="flex">
                         <div class="flex-shrink-0">

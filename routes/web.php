@@ -25,6 +25,8 @@ Route::middleware(['auth'])->group(function () {
     // ------------------------------------------------------------------------
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/api/total-students', [DashboardController::class, 'apiTotalStudents'])->name('dashboard.api.total-students');
+    // Statistik
+    Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
 
     // ------------------------------------------------------------------------
     // PENDAFTARAN (SEMUA USER)
@@ -35,13 +37,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [PendaftaranController::class, 'store'])->name('store');
         Route::get('/', [PendaftaranController::class, 'index'])->name('index');
 
-        // Route dengan parameter spesifik (ID)
-        Route::get('/cetak/{id}', [PendaftaranController::class, 'cetakKartu'])->name('cetak');
-        Route::get('/{id}', [PendaftaranController::class, 'show'])->name('show');
-
         // Route khusus admin (manajemen data)
         Route::middleware(['role:admin'])->group(function () {
-            // Soft delete & trash
+            // Soft delete & trash (HARUS SEBELUM /{id} route)
             Route::get('/trash', [PendaftaranController::class, 'trash'])->name('trash');
             Route::post('/restore-all', [PendaftaranController::class, 'restoreAll'])->name('restore-all');
             Route::delete('/empty-trash', [PendaftaranController::class, 'emptyTrash'])->name('empty-trash');
@@ -55,6 +53,10 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{id}/force-delete', [PendaftaranController::class, 'forceDelete'])->name('force-delete');
             Route::post('/{id}/restore', [PendaftaranController::class, 'restore'])->name('restore');
         });
+
+        // Route dengan parameter spesifik (ID) - HARUS PALING AKHIR
+        Route::get('/cetak/{id}', [PendaftaranController::class, 'cetakKartu'])->name('cetak');
+        Route::get('/{id}', [PendaftaranController::class, 'show'])->name('show');
     });
 
     // ------------------------------------------------------------------------
@@ -67,9 +69,6 @@ Route::middleware(['auth'])->group(function () {
 
         // Manajemen Users
         Route::resource('users', UserController::class);
-
-        // Statistik
-        Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
 
         // --------------------------------------------------------------------
         // MANAJEMEN GROUPING

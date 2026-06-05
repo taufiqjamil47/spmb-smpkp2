@@ -161,18 +161,11 @@
                             class="w-full border rounded px-3 py-2">
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Siswa</label>
-                        <input type="text" name="no_hp_siswa"
-                            value="{{ old('no_hp_siswa', $pendaftar->no_hp_siswa) }}"
-                            class="w-full border rounded px-3 py-2">
-                    </div>
-
-                    <div>
+                    {{-- <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">No. Telepon Rumah</label>
                         <input type="text" name="no_telp" value="{{ old('no_telp', $pendaftar->no_telp) }}"
                             class="w-full border rounded px-3 py-2">
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
@@ -436,7 +429,20 @@
                             @endforeach
                         </select>
                     </div>
+                </div>
+            </div>
 
+
+            <!-- Nomor Kontak -->
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold mb-4 pb-2 border-b">I. Nomor Kontak (Wajib)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Siswa</label>
+                        <input type="text" name="no_hp_siswa"
+                            value="{{ old('no_hp_siswa', $pendaftar->no_hp_siswa) }}"
+                            class="w-full border rounded px-3 py-2">
+                    </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">No. HP Orang Tua/Wali <span
                                 class="text-red-500">*</span></label>

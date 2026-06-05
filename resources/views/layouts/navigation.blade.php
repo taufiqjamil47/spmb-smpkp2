@@ -41,12 +41,6 @@
                 <span class="menu-text whitespace-nowrap">Kelola Kuota</span>
             </a>
 
-            <a href="{{ route('statistik.index') }}"
-                class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('statistik.*') ? 'bg-blue-700' : '' }} flex items-center">
-                <i class="fas fa-chart-pie mr-3 w-5"></i>
-                <span class="menu-text whitespace-nowrap">Statistik</span>
-            </a>
-
             <a href="{{ route('groupings.index') }}"
                 class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('groupings.*') ? 'bg-blue-700' : '' }} flex items-center">
                 <i class="fas fa-sitemap mr-3 w-5"></i>
@@ -67,6 +61,11 @@
                         <span class="menu-text whitespace-nowrap">Kelola User</span>
                     </a> --}}
         @endif
+        <a href="{{ route('statistik.index') }}"
+            class="nav-link block py-3 px-4 hover:bg-blue-700 {{ request()->routeIs('statistik.*') ? 'bg-blue-700' : '' }} flex items-center">
+            <i class="fas fa-chart-pie mr-3 w-5"></i>
+            <span class="menu-text whitespace-nowrap">Statistik</span>
+        </a>
     </nav>
 
     <!-- User Info & Logout - Fixed at bottom -->

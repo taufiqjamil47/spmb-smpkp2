@@ -6,7 +6,7 @@
     <div class="mb-6">
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold">Statistik PPDB</h1>
+                <h1 class="text-3xl font-bold">Statistik SPMB</h1>
                 <p class="text-gray-600">Analisis data pendaftaran siswa</p>
             </div>
             <div class="flex space-x-2">
@@ -23,9 +23,9 @@
                         <i class="fas fa-filter mr-2"></i>Filter
                     </button>
                 </form>
-                <a href="#" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                {{-- <a href="#" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                     <i class="fas fa-download mr-2"></i>Export
-                </a>
+                </a> --}}
             </div>
         </div>
     </div>

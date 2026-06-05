@@ -133,10 +133,6 @@
                     <p class="text-sm text-gray-600">Kecamatan</p>
                     <p class="font-semibold">{{ $pendaftar->kecamatan ?? '-' }}</p>
                 </div>
-                <div>
-                    <p class="text-sm text-gray-600">No. HP/Telepon</p>
-                    <p class="font-semibold">{{ $pendaftar->no_hp_siswa ?? '-' }} / {{ $pendaftar->no_telp ?? '-' }}</p>
-                </div>
             </div>
         </div>
 
@@ -270,10 +266,10 @@
 
         <!-- Kontak Orang Tua -->
         <div class="mb-6">
-            <h2 class="text-lg font-semibold bg-blue-50 p-2 mb-4">Kontak Orang Tua/Wali</h2>
+            <h2 class="text-lg font-semibold bg-blue-50 p-2 mb-4">Kontak Orang Tua / Siswa</h2>
             <div>
-                <p class="text-sm text-gray-600">No. HP Orang Tua/Wali</p>
-                <p class="font-semibold">{{ $pendaftar->no_hp_ortu }}</p>
+                <p class="text-sm text-gray-600">No. HP Orang Tua / Siswa</p>
+                <p class="font-semibold">{{ $pendaftar->no_hp_ortu }} / {{ $pendaftar->no_hp_siswa ?? '-' }}</p>
             </div>
         </div>
 

@@ -88,7 +88,7 @@ class PendaftaranController extends Controller
             'nama_ayah' => 'required',
             'nama_ibu' => 'required',
             'no_hp_siswa' => 'required',
-            'no_telp' => 'required',
+            // 'no_telp' => 'required',
             'no_hp_ortu' => 'required',
 
             // Validasi numerik
@@ -140,6 +140,16 @@ class PendaftaranController extends Controller
             $requestedWithNames = implode('|', $names);
         }
 
+        $alamatAsli = $request->alamat;
+        // Cek apakah diawali dengan "Kp." atau "Kp" (abaikan spasi awal dan case)
+        $trimmedAlamat = ltrim($alamatAsli);
+        if (!preg_match('/^kp\.?/i', $trimmedAlamat)) {
+            // Jika tidak diawali Kp. atau Kp, tambahkan "Kp. "
+            $alamatFinal = 'Kp. ' . ucfirst($alamatAsli);
+        } else {
+            $alamatFinal = ucfirst($alamatAsli);
+        }
+
         // Siapkan data untuk disimpan
         $data = [
             'no_peserta' => $no_peserta,
@@ -156,7 +166,7 @@ class PendaftaranController extends Controller
             'agama' => $request->agama,
 
             // Alamat
-            'alamat' => $request->alamat,
+            'alamat' => $alamatFinal,
             'rt' => $request->rt,
             'rw' => $request->rw,
             'desa' => strtoupper($request->desa),
@@ -164,7 +174,7 @@ class PendaftaranController extends Controller
 
             // Kontak
             'no_hp_siswa' => $request->no_hp_siswa,
-            'no_telp' => $request->no_telp,
+            // 'no_telp' => $request->no_telp,
 
             // Sekolah
             'sekolah_asal' => strtoupper($request->sekolah_asal),
@@ -254,6 +264,16 @@ class PendaftaranController extends Controller
 
         $pendaftar = CalonSiswa::withTrashed()->findOrFail($id);
 
+        $alamatAsli = $request->alamat;
+        // Cek apakah diawali dengan "Kp." atau "Kp" (abaikan spasi awal dan case)
+        $trimmedAlamat = ltrim($alamatAsli);
+        if (!preg_match('/^kp\.?/i', $trimmedAlamat)) {
+            // Jika tidak diawali Kp. atau Kp, tambahkan "Kp. "
+            $alamatFinal = 'Kp. ' . ucfirst($alamatAsli);
+        } else {
+            $alamatFinal = ucfirst($alamatAsli);
+        }
+
         // Validasi data
         $request->validate([
             // Data wajib
@@ -300,7 +320,7 @@ class PendaftaranController extends Controller
             'agama' => $request->agama,
 
             // Alamat
-            'alamat' => $request->alamat,
+            'alamat' => $alamatFinal,
             'rt' => $request->rt,
             'rw' => $request->rw,
             'desa' => strtoupper($request->desa),
@@ -308,7 +328,7 @@ class PendaftaranController extends Controller
 
             // Kontak
             'no_hp_siswa' => $request->no_hp_siswa,
-            'no_telp' => $request->no_telp,
+            // 'no_telp' => $request->no_telp,
 
             // Sekolah
             'sekolah_asal' => strtoupper($request->sekolah_asal),
