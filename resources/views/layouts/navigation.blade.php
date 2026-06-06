@@ -119,7 +119,7 @@
     }
 
     .floating-sidebar {
-        animation: float 6s ease-in-out infinite;
+        /* animation: float 6s ease-in-out infinite; */
         box-shadow: #000000 0px 15px 30px -10px, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset;
     }
 
@@ -244,6 +244,14 @@
                 <span class="menu-text text-sm font-medium">Kelola Kuota</span>
             </a>
 
+            <a href="{{ route('users.index') }}"
+                class="nav-link block py-2.5 px-4 hover:bg-white/5 {{ request()->routeIs('users.*') ? 'active' : '' }} flex items-center group"
+                data-tooltip="Manajemen User">
+                <i
+                    class="fas fa-users-cog mr-3 w-5 text-lg text-white/70 group-hover:text-white group-hover:scale-110 transition-all"></i>
+                <span class="menu-text text-sm font-medium">Manajemen User</span>
+            </a>
+
             <a href="{{ route('groupings.index') }}"
                 class="nav-link block py-2.5 px-4 hover:bg-white/5 {{ request()->routeIs('groupings.*') ? 'active' : '' }} flex items-center group justify-between"
                 data-tooltip="Manajemen Request">
@@ -298,6 +306,11 @@
                     </p>
                 </div>
             </div>
+            <a href="{{ route('profile.edit') }}"
+                class="profile-btn w-full text-left flex items-center px-3 py-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300 group menu-text">
+                <i class="fas fa-cog mr-3 text-lg group-hover:scale-110 group-hover:rotate-12 transition-all"></i>
+                <span class="text-sm font-medium">Pengaturan</span>
+            </a>
             <form method="POST" action="{{ route('logout') }}" class="menu-text">
                 @csrf
                 <button type="submit"

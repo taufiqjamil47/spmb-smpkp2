@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Statistik PPDB')
+@section('title', 'Statistik SPMB')
 
 @section('content')
     <div class="div mt-8">

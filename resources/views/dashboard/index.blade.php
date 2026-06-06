@@ -35,9 +35,9 @@
                         <span class="text-3xl font-bold text-gray-800">{{ number_format($totalPendaftar) }}</span>
                     </div>
                     <p class="text-gray-500 text-sm font-medium">Total Pendaftar</p>
-                    <div class="mt-2 h-1 bg-blue-100 rounded-full">
+                    {{-- <div class="mt-2 h-1 bg-blue-100 rounded-full">
                         <div class="w-3/4 h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
@@ -52,9 +52,9 @@
                             class="text-xl font-bold text-gray-800 truncate max-w-[150px]">{{ $tahunAjaranAktif ? $tahunAjaranAktif->tahun_ajaran : '-' }}</span>
                     </div>
                     <p class="text-gray-500 text-sm font-medium">Tahun Ajaran Aktif</p>
-                    <div class="mt-2 h-1 bg-green-100 rounded-full">
+                    {{-- <div class="mt-2 h-1 bg-green-100 rounded-full">
                         <div class="w-full h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full"></div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
@@ -68,9 +68,9 @@
                         <span class="text-3xl font-bold text-gray-800">{{ $totalTahunAjaran }}</span>
                     </div>
                     <p class="text-gray-500 text-sm font-medium">Total Tahun Ajaran</p>
-                    <div class="mt-2 h-1 bg-purple-100 rounded-full">
+                    {{-- <div class="mt-2 h-1 bg-purple-100 rounded-full">
                         <div class="w-2/3 h-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-full"></div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
@@ -86,9 +86,9 @@
                         </span>
                     </div>
                     <p class="text-gray-500 text-sm font-medium">Rata-rata/Tahun</p>
-                    <div class="mt-2 h-1 bg-yellow-100 rounded-full">
+                    {{-- <div class="mt-2 h-1 bg-yellow-100 rounded-full">
                         <div class="w-1/2 h-full bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full"></div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </div>

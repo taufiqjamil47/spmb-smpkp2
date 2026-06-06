@@ -142,6 +142,7 @@
             // ignore if localStorage is unavailable
         }
     </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 
@@ -152,7 +153,7 @@
 
         <!-- Main Content -->
         <main class="flex-1 transition-all duration-300" id="mainContent">
-            <div class="container mx-auto px-4 py-4 md:px-6 md:py-6">
+            <div class="container mx-auto px-4 py-4 md:px-8 md:py-6">
                 <!-- Student Count Badge - Repositioned -->
                 <div id="student-count-badge"
                     class="hidden md:block fixed top-2 left-1/2 transform -translate-x-1/2 z-40 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg px-5 py-1 text-white">
