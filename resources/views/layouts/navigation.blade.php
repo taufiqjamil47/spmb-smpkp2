@@ -190,14 +190,13 @@
     <div class="p-6 pb-4 flex items-center justify-between border-b border-white/10">
         <div class="menu-text">
             <div class="flex items-center space-x-3">
-                <div
-                    class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                    <img src="{{ asset('Logo.png') }}" alt="Logo" class="w-5 h-5 object-contain">
+                <div class="w-12 h-12  flex items-center justify-center">
+                    <img src="{{ asset('Logo.png') }}" alt="Logo" class="w-11 h-11 object-contain">
                 </div>
                 <div>
                     <h2
-                        class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
-                        SPMB SMP
+                        class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
+                        SMP KP 2 Majalaya
                     </h2>
                     <p class="text-xs text-white/60 font-medium mt-0.5">Tahun Ajaran {{ date('Y') }}</p>
                 </div>
