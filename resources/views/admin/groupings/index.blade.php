@@ -124,8 +124,8 @@
                             <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Processing
                             </option>
                         </select>
-                        <i
-                            class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        {{-- <i
+                            class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                     </div>
                 </div>
 
@@ -144,8 +144,8 @@
                                 </option>
                             @endforeach
                         </select>
-                        <i
-                            class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        {{-- <i
+                            class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                     </div>
                 </div>
 

@@ -60,12 +60,52 @@ class StatistikController extends Controller
             ->orderBy('total', 'desc')
             ->get();
 
+        // Statistik berdasarkan pendidikan ayah
+        $statPendidikanAyah = CalonSiswa::select('pendidikan_ayah', DB::raw('count(*) as total'))
+            ->whereNotNull('pendidikan_ayah')
+            ->groupBy('pendidikan_ayah')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        // Statistik berdasarkan pekerjaan ibu
+        $statPekerjaanIbu = CalonSiswa::select('pekerjaan_ibu', DB::raw('count(*) as total'))
+            ->whereNotNull('pekerjaan_ibu')
+            ->groupBy('pekerjaan_ibu')
+            ->orderBy('total', 'desc')
+            ->get();
+
         // Statistik berdasarkan pendidikan ibu
         $statPendidikanIbu = CalonSiswa::select('pendidikan_ibu', DB::raw('count(*) as total'))
             ->whereNotNull('pendidikan_ibu')
             ->groupBy('pendidikan_ibu')
             ->orderBy('total', 'desc')
             ->get();
+
+        // Statistik bantuan sosial
+        $statBantuanSosial = [
+            'pkh' => CalonSiswa::whereNotNull('pkh')->where('pkh', '!=', '')->count(),
+            'kks' => CalonSiswa::whereNotNull('kks')->where('kks', '!=', '')->count(),
+            'pip' => CalonSiswa::whereNotNull('pip')->where('pip', '!=', '')->count(),
+        ];
+        $statBantuanSosial['any'] = CalonSiswa::where(function ($query) {
+            $query->whereNotNull('pkh')->where('pkh', '!=', '')
+                ->orWhereNotNull('kks')->where('kks', '!=', '')
+                ->orWhereNotNull('pip')->where('pip', '!=', '');
+        })->count();
+
+        $sosialEkonomiMap = [
+            'Tinggi' => ['PNS/TNI/POLRI', 'Karyawan Swasta', 'Pedagang Besar', 'Wiraswasta', 'Wirausaha'],
+            'Menengah' => ['Petani', 'Peternak', 'Nelayan', 'Pedagang Kecil', 'Buruh', 'Pensiunan'],
+            'Lainnya' => ['Tidak Bekerja', 'Lainnya'],
+        ];
+
+        $statPekerjaanAyahSegment = collect($sosialEkonomiMap)->mapWithKeys(function ($jobs, $segment) {
+            return [$segment => CalonSiswa::whereIn('pekerjaan_ayah', $jobs)->count()];
+        });
+
+        $statPekerjaanIbuSegment = collect($sosialEkonomiMap)->mapWithKeys(function ($jobs, $segment) {
+            return [$segment => CalonSiswa::whereIn('pekerjaan_ibu', $jobs)->count()];
+        });
 
         // Statistik berdasarkan asal sekolah
         $statSekolah = CalonSiswa::select('sekolah_asal', DB::raw('count(*) as total'))
@@ -145,7 +185,12 @@ class StatistikController extends Controller
             'statJk',
             'statAgama',
             'statPekerjaanAyah',
+            'statPendidikanAyah',
+            'statPekerjaanIbu',
             'statPendidikanIbu',
+            'statBantuanSosial',
+            'statPekerjaanAyahSegment',
+            'statPekerjaanIbuSegment',
             'statSekolah',
             'statAlamat',
             'statUkuranBaju',
@@ -155,13 +200,5 @@ class StatistikController extends Controller
             'statJkTahun',
             'statAgamaTahun'
         ));
-    }
-
-    /**
-     * Export statistik ke Excel.
-     */
-    public function export(Request $request)
-    {
-        // Implementasi export statistik
     }
 }

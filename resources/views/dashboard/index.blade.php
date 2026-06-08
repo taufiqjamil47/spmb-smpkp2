@@ -424,10 +424,10 @@
                                 </option>
                                 <option value="yearly" {{ $filterType == 'yearly' ? 'selected' : '' }}>📈 Tahunan</option>
                             </select>
-                            <div
+                            {{-- <div
                                 class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <i class="fas fa-chevron-down text-xs"></i>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div id="yearFilter" class="relative"
@@ -439,10 +439,10 @@
                                         {{ $year }}</option>
                                 @endforeach
                             </select>
-                            <div
+                            {{-- <div
                                 class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <i class="fas fa-chevron-down text-xs"></i>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div id="monthFilter" class="relative"

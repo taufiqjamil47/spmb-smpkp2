@@ -162,8 +162,8 @@
                                     <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan
                                     </option>
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
 
@@ -191,8 +191,8 @@
                                     <option value="Lainnya" {{ old('agama') == 'Lainnya' ? 'selected' : '' }}>Lainnya
                                     </option>
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
                     </div>
@@ -285,13 +285,13 @@
                                     <option value="">Pilih Tahun Lulus</option>
                                     @for ($tahun = date('Y'); $tahun >= date('Y') - 5; $tahun--)
                                         <option value="{{ $tahun }}"
-                                            {{ old('tahun_lulus') == $tahun ? 'selected' : '' }}>
+                                            {{ old('tahun_lulus', date('Y')) == $tahun ? 'selected' : '' }}>
                                             {{ $tahun }}
                                         </option>
                                     @endfor
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
                     </div>
@@ -360,8 +360,8 @@
                                     <option value="XXL" {{ old('ukuran_baju') == 'XXL' ? 'selected' : '' }}>XXL (Double
                                         Extra Large)</option>
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
                     </div>
@@ -460,8 +460,8 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
 
@@ -495,8 +495,8 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
                     </div>
@@ -544,8 +544,8 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
 
@@ -564,8 +564,8 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
                     </div>
@@ -611,8 +611,8 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
 
@@ -631,8 +631,8 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                         </div>
                     </div>
@@ -753,8 +753,8 @@
                                         <i class="fas fa-flag-checkered"></i> Prioritas Tinggi
                                     </option>
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                             <p class="text-xs text-gray-500 mt-1">Prioritas tinggi akan diusahakan lebih dahulu oleh admin
                             </p>

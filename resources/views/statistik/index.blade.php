@@ -33,8 +33,8 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i
-                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                {{-- <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i> --}}
                             </div>
                             <button type="submit"
                                 class="bg-white text-blue-600 px-5 py-2 rounded-xl hover:bg-gray-100 transition-all font-medium shadow-md">
@@ -269,6 +269,42 @@
                 </div>
             </div>
 
+            <!-- Pendidikan Ayah -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-50 to-violet-50 px-6 py-4 border-b border-indigo-100">
+                    <h2 class="text-lg font-bold text-gray-800">
+                        <i class="fas fa-graduation-cap text-indigo-500 mr-2"></i>
+                        Pendidikan Ayah
+                    </h2>
+                </div>
+                <div class="p-6 max-h-72 overflow-y-auto">
+                    @foreach ($statPendidikanAyah as $pendidikan)
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                            <span class="text-gray-700">{{ $pendidikan->pendidikan_ayah ?: 'Tidak diisi' }}</span>
+                            <span class="font-semibold text-gray-800">{{ number_format($pendidikan->total) }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Pekerjaan Ibu -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-pink-50 to-rose-50 px-6 py-4 border-b border-pink-100">
+                    <h2 class="text-lg font-bold text-gray-800">
+                        <i class="fas fa-briefcase text-pink-500 mr-2"></i>
+                        Pekerjaan Ibu
+                    </h2>
+                </div>
+                <div class="p-6 max-h-72 overflow-y-auto">
+                    @foreach ($statPekerjaanIbu as $pekerjaan)
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                            <span class="text-gray-700">{{ $pekerjaan->pekerjaan_ibu ?: 'Tidak diisi' }}</span>
+                            <span class="font-semibold text-gray-800">{{ number_format($pekerjaan->total) }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
             <!-- Pendidikan Ibu -->
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="bg-gradient-to-r from-green-50 to-teal-50 px-6 py-4 border-b border-green-100">
@@ -284,6 +320,98 @@
                             <span class="font-semibold text-gray-800">{{ number_format($pendidikan->total) }}</span>
                         </div>
                     @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- Analisis Sosial Ekonomi -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100">
+                <h2 class="text-lg font-bold text-gray-800">
+                    <i class="fas fa-hand-holding-usd text-cyan-500 mr-2"></i>
+                    Analisis Sosial Ekonomi
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Analisis berdasarkan penerima bantuan sosial dan pekerjaan orang tua.
+                </p>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                    <div class="rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white p-5 shadow">
+                        <p class="text-sm uppercase tracking-wide">Penerima Bantuan</p>
+                        <p class="text-3xl font-bold">{{ number_format($statBantuanSosial['any']) }}</p>
+                        <p class="text-xs text-teal-100">
+                            {{ round(($statBantuanSosial['any'] / max($summary['total_pendaftar'], 1)) * 100) }}% siswa</p>
+                    </div>
+                    <div class="rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white p-5 shadow">
+                        <p class="text-sm uppercase tracking-wide">PKH</p>
+                        <p class="text-3xl font-bold">{{ number_format($statBantuanSosial['pkh']) }}</p>
+                        <p class="text-xs text-indigo-100">
+                            {{ round(($statBantuanSosial['pkh'] / max($summary['total_pendaftar'], 1)) * 100) }}% siswa</p>
+                    </div>
+                    <div class="rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white p-5 shadow">
+                        <p class="text-sm uppercase tracking-wide">KKS</p>
+                        <p class="text-3xl font-bold">{{ number_format($statBantuanSosial['kks']) }}</p>
+                        <p class="text-xs text-amber-100">
+                            {{ round(($statBantuanSosial['kks'] / max($summary['total_pendaftar'], 1)) * 100) }}% siswa</p>
+                    </div>
+                    <div class="rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 text-white p-5 shadow">
+                        <p class="text-sm uppercase tracking-wide">PIP</p>
+                        <p class="text-3xl font-bold">{{ number_format($statBantuanSosial['pip']) }}</p>
+                        <p class="text-xs text-pink-100">
+                            {{ round(($statBantuanSosial['pip'] / max($summary['total_pendaftar'], 1)) * 100) }}% siswa</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 rounded-2xl p-5">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-4">Segmen Pekerjaan Ayah</h3>
+                        <div class="space-y-4">
+                            @foreach ($statPekerjaanAyahSegment as $segment => $count)
+                                @php
+                                    $persen =
+                                        $summary['total_pendaftar'] > 0
+                                            ? round(($count / $summary['total_pendaftar']) * 100)
+                                            : 0;
+                                @endphp
+                                <div>
+                                    <div class="flex items-center justify-between text-sm text-gray-700 mb-2">
+                                        <span>{{ $segment }}</span>
+                                        <span class="font-semibold">{{ number_format($count) }}
+                                            ({{ $persen }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-cyan-500 to-blue-600 h-2 rounded-full"
+                                            style="width: {{ $persen }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-2xl p-5">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-4">Segmen Pekerjaan Ibu</h3>
+                        <div class="space-y-4">
+                            @foreach ($statPekerjaanIbuSegment as $segment => $count)
+                                @php
+                                    $persen =
+                                        $summary['total_pendaftar'] > 0
+                                            ? round(($count / $summary['total_pendaftar']) * 100)
+                                            : 0;
+                                @endphp
+                                <div>
+                                    <div class="flex items-center justify-between text-sm text-gray-700 mb-2">
+                                        <span>{{ $segment }}</span>
+                                        <span class="font-semibold">{{ number_format($count) }}
+                                            ({{ $persen }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-fuchsia-500 to-pink-600 h-2 rounded-full"
+                                            style="width: {{ $persen }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
