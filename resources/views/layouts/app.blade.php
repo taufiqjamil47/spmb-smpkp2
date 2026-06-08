@@ -130,6 +130,38 @@
                 opacity: 0.7;
             }
         }
+
+        /* Di style section */
+        :root {
+            --badge-bg-start: 37, 99, 235;
+            /* blue-600 */
+            --badge-bg-end: 55, 48, 163;
+            /* indigo-700 */
+            --badge-text-opacity: 1;
+        }
+
+        @media (prefers-contrast: more) {
+            .student-count-badge {
+                outline: 2px solid currentColor;
+                outline-offset: 2px;
+            }
+        }
+
+        /* Auto-dark mode berdasarkan background parent */
+        .student-count-badge-auto {
+            background: linear-gradient(135deg,
+                    rgba(var(--badge-bg-start), 0.9),
+                    rgba(var(--badge-bg-end), 0.9));
+            backdrop-filter: blur(8px);
+        }
+
+        /* Fallback jika backdrop-filter tidak support */
+        @supports not (backdrop-filter: blur(8px)) {
+            .student-count-badge-auto {
+                background: linear-gradient(135deg, rgb(37, 99, 235), rgb(55, 48, 163));
+                opacity: 0.95;
+            }
+        }
     </style>
     <script>
         // Prevent FOUC (Flash of Unstyled Content)
@@ -156,17 +188,19 @@
             <div class="container mx-auto px-4 py-4 md:px-8 md:py-6">
                 <!-- Student Count Badge - Repositioned -->
                 <div id="student-count-badge"
-                    class="hidden md:block fixed top-2 left-1/2 transform -translate-x-1/2 z-40 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg px-5 py-1 text-white">
+                    class="hidden md:block fixed top-2 left-1/2 transform -translate-x-1/2 z-40 rounded-full shadow-lg px-5 py-1 backdrop-blur-md"
+                    style="background: rgba(37, 99, 235, 0.85);">
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-users text-blue-200"></i>
                             <div class="text-xs uppercase tracking-wider text-blue-100/80">Total Pendaftar</div>
                         </div>
                         <div class="h-6 w-px bg-blue-400/30"></div>
-                        <div id="student-count-value" class="text-xl font-bold">Memuat...</div>
+                        <div id="student-count-value" class="text-xl font-bold text-white drop-shadow-md">Memuat...
+                        </div>
                         <div class="h-6 w-px bg-blue-400/30 hidden lg:block"></div>
-                        <div id="student-count-hint" class="text-xs text-blue-100/70 hidden lg:block">Diperbarui setiap
-                            35s</div>
+                        <div id="student-count-hint" class="text-xs text-blue-100/70 hidden lg:block drop-shadow-md">
+                            Diperbarui setiap 35s</div>
                     </div>
                 </div>
 
@@ -220,7 +254,6 @@
             }
         </style>
     @endpush
-
     <script>
         function toggleSidebar() {
             const isCollapsed = document.documentElement.classList.toggle('sidebar-collapsed');

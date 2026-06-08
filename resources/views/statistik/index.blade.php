@@ -249,6 +249,195 @@
             </div>
         </div>
 
+        <!-- Statistik Segmen Sosial Ekonomi (PKH, KKS, PIP) -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-emerald-100">
+                <h2 class="text-lg font-bold text-gray-800">
+                    <i class="fas fa-heart-hands text-emerald-500 mr-2"></i>
+                    Segmen Sosial Ekonomi
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- PKH Card -->
+                    <div class="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 border border-emerald-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Program Keluarga Harapan (PKH)</h3>
+                            <i class="fas fa-people-carry text-emerald-500 text-2xl"></i>
+                        </div>
+                        <div class="space-y-4">
+                            @php
+                                $pkhYa = $statSosialEkonomi['pkh']['ya'];
+                                $pkhTotal = $statSosialEkonomi['pkh']['total'];
+                                $pkhPersen = $pkhTotal > 0 ? round(($pkhYa / $pkhTotal) * 100) : 0;
+                                $pkhLaki = $statSosialEkonomiJk['pkh']['L'] ?? 0;
+                                $pkhPerempuan = $statSosialEkonomiJk['pkh']['P'] ?? 0;
+                            @endphp
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Penerima PKH</p>
+                                <p class="text-3xl font-bold text-emerald-600">{{ number_format($pkhYa) }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $pkhPersen }}% dari total pendaftar</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 space-y-2">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-600"><i
+                                            class="fas fa-mars text-blue-500 mr-1"></i>Laki-laki</span>
+                                    <span class="font-semibold text-gray-800">{{ $pkhLaki }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-600"><i
+                                            class="fas fa-venus text-pink-500 mr-1"></i>Perempuan</span>
+                                    <span class="font-semibold text-gray-800">{{ $pkhPerempuan }}</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-emerald-500 to-green-500 h-2 rounded-full transition-all duration-500"
+                                    style="width: {{ $pkhPersen }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KKS Card -->
+                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Kartu Keluarga Sejahtera (KKS)</h3>
+                            <i class="fas fa-id-card text-blue-500 text-2xl"></i>
+                        </div>
+                        <div class="space-y-4">
+                            @php
+                                $kksYa = $statSosialEkonomi['kks']['ya'];
+                                $kksTotal = $statSosialEkonomi['kks']['total'];
+                                $kksPersen = $kksTotal > 0 ? round(($kksYa / $kksTotal) * 100) : 0;
+                                $kksLaki = $statSosialEkonomiJk['kks']['L'] ?? 0;
+                                $kksPerempuan = $statSosialEkonomiJk['kks']['P'] ?? 0;
+                            @endphp
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Pemegang KKS</p>
+                                <p class="text-3xl font-bold text-blue-600">{{ number_format($kksYa) }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $kksPersen }}% dari total pendaftar</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 space-y-2">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-600"><i
+                                            class="fas fa-mars text-blue-500 mr-1"></i>Laki-laki</span>
+                                    <span class="font-semibold text-gray-800">{{ $kksLaki }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-600"><i
+                                            class="fas fa-venus text-pink-500 mr-1"></i>Perempuan</span>
+                                    <span class="font-semibold text-gray-800">{{ $kksPerempuan }}</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-500"
+                                    style="width: {{ $kksPersen }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PIP Card -->
+                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Program Indonesia Pintar (PIP)</h3>
+                            <i class="fas fa-book text-amber-500 text-2xl"></i>
+                        </div>
+                        <div class="space-y-4">
+                            @php
+                                $pipYa = $statSosialEkonomi['pip']['ya'];
+                                $pipTotal = $statSosialEkonomi['pip']['total'];
+                                $pipPersen = $pipTotal > 0 ? round(($pipYa / $pipTotal) * 100) : 0;
+                                $pipLaki = $statSosialEkonomiJk['pip']['L'] ?? 0;
+                                $pipPerempuan = $statSosialEkonomiJk['pip']['P'] ?? 0;
+                            @endphp
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Penerima PIP</p>
+                                <p class="text-3xl font-bold text-amber-600">{{ number_format($pipYa) }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $pipPersen }}% dari total pendaftar</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 space-y-2">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-600"><i
+                                            class="fas fa-mars text-blue-500 mr-1"></i>Laki-laki</span>
+                                    <span class="font-semibold text-gray-800">{{ $pipLaki }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-600"><i
+                                            class="fas fa-venus text-pink-500 mr-1"></i>Perempuan</span>
+                                    <span class="font-semibold text-gray-800">{{ $pipPerempuan }}</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full transition-all duration-500"
+                                    style="width: {{ $pipPersen }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Table -->
+                <div class="mt-6 overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Program</th>
+                                <th class="px-4 py-2 text-center text-xs font-semibold text-gray-600">Penerima</th>
+                                <th class="px-4 py-2 text-center text-xs font-semibold text-gray-600">Persentase</th>
+                                <th class="px-4 py-2 text-center text-xs font-semibold text-gray-600">Laki-laki</th>
+                                <th class="px-4 py-2 text-center text-xs font-semibold text-gray-600">Perempuan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium text-gray-800">
+                                    <i class="fas fa-people-carry text-emerald-500 mr-2"></i>PKH
+                                </td>
+                                <td class="px-4 py-3 text-center font-semibold text-gray-800">{{ number_format($pkhYa) }}
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                                        {{ $pkhPersen }}%
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-center text-blue-600 font-medium">{{ $pkhLaki }}</td>
+                                <td class="px-4 py-3 text-center text-pink-600 font-medium">{{ $pkhPerempuan }}</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium text-gray-800">
+                                    <i class="fas fa-id-card text-blue-500 mr-2"></i>KKS
+                                </td>
+                                <td class="px-4 py-3 text-center font-semibold text-gray-800">{{ number_format($kksYa) }}
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                        {{ $kksPersen }}%
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-center text-blue-600 font-medium">{{ $kksLaki }}</td>
+                                <td class="px-4 py-3 text-center text-pink-600 font-medium">{{ $kksPerempuan }}</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium text-gray-800">
+                                    <i class="fas fa-book text-amber-500 mr-2"></i>PIP
+                                </td>
+                                <td class="px-4 py-3 text-center font-semibold text-gray-800">{{ number_format($pipYa) }}
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                                        {{ $pipPersen }}%
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-center text-blue-600 font-medium">{{ $pipLaki }}</td>
+                                <td class="px-4 py-3 text-center text-pink-600 font-medium">{{ $pipPerempuan }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Statistik Pekerjaan & Pendidikan -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <!-- Pekerjaan Ayah -->
@@ -320,98 +509,6 @@
                             <span class="font-semibold text-gray-800">{{ number_format($pendidikan->total) }}</span>
                         </div>
                     @endforeach
-                </div>
-            </div>
-        </div>
-
-        <!-- Analisis Sosial Ekonomi -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div class="bg-gradient-to-r from-cyan-50 to-blue-50 px-6 py-4 border-b border-cyan-100">
-                <h2 class="text-lg font-bold text-gray-800">
-                    <i class="fas fa-hand-holding-usd text-cyan-500 mr-2"></i>
-                    Analisis Sosial Ekonomi
-                </h2>
-                <p class="text-sm text-gray-500 mt-1">Analisis berdasarkan penerima bantuan sosial dan pekerjaan orang tua.
-                </p>
-            </div>
-            <div class="p-6 space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                    <div class="rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white p-5 shadow">
-                        <p class="text-sm uppercase tracking-wide">Penerima Bantuan</p>
-                        <p class="text-3xl font-bold">{{ number_format($statBantuanSosial['any']) }}</p>
-                        <p class="text-xs text-teal-100">
-                            {{ round(($statBantuanSosial['any'] / max($summary['total_pendaftar'], 1)) * 100) }}% siswa</p>
-                    </div>
-                    <div class="rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white p-5 shadow">
-                        <p class="text-sm uppercase tracking-wide">PKH</p>
-                        <p class="text-3xl font-bold">{{ number_format($statBantuanSosial['pkh']) }}</p>
-                        <p class="text-xs text-indigo-100">
-                            {{ round(($statBantuanSosial['pkh'] / max($summary['total_pendaftar'], 1)) * 100) }}% siswa</p>
-                    </div>
-                    <div class="rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white p-5 shadow">
-                        <p class="text-sm uppercase tracking-wide">KKS</p>
-                        <p class="text-3xl font-bold">{{ number_format($statBantuanSosial['kks']) }}</p>
-                        <p class="text-xs text-amber-100">
-                            {{ round(($statBantuanSosial['kks'] / max($summary['total_pendaftar'], 1)) * 100) }}% siswa</p>
-                    </div>
-                    <div class="rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 text-white p-5 shadow">
-                        <p class="text-sm uppercase tracking-wide">PIP</p>
-                        <p class="text-3xl font-bold">{{ number_format($statBantuanSosial['pip']) }}</p>
-                        <p class="text-xs text-pink-100">
-                            {{ round(($statBantuanSosial['pip'] / max($summary['total_pendaftar'], 1)) * 100) }}% siswa</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-gray-50 rounded-2xl p-5">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-4">Segmen Pekerjaan Ayah</h3>
-                        <div class="space-y-4">
-                            @foreach ($statPekerjaanAyahSegment as $segment => $count)
-                                @php
-                                    $persen =
-                                        $summary['total_pendaftar'] > 0
-                                            ? round(($count / $summary['total_pendaftar']) * 100)
-                                            : 0;
-                                @endphp
-                                <div>
-                                    <div class="flex items-center justify-between text-sm text-gray-700 mb-2">
-                                        <span>{{ $segment }}</span>
-                                        <span class="font-semibold">{{ number_format($count) }}
-                                            ({{ $persen }}%)</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2">
-                                        <div class="bg-gradient-to-r from-cyan-500 to-blue-600 h-2 rounded-full"
-                                            style="width: {{ $persen }}%"></div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 rounded-2xl p-5">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-4">Segmen Pekerjaan Ibu</h3>
-                        <div class="space-y-4">
-                            @foreach ($statPekerjaanIbuSegment as $segment => $count)
-                                @php
-                                    $persen =
-                                        $summary['total_pendaftar'] > 0
-                                            ? round(($count / $summary['total_pendaftar']) * 100)
-                                            : 0;
-                                @endphp
-                                <div>
-                                    <div class="flex items-center justify-between text-sm text-gray-700 mb-2">
-                                        <span>{{ $segment }}</span>
-                                        <span class="font-semibold">{{ number_format($count) }}
-                                            ({{ $persen }}%)</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2">
-                                        <div class="bg-gradient-to-r from-fuchsia-500 to-pink-600 h-2 rounded-full"
-                                            style="width: {{ $persen }}%"></div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

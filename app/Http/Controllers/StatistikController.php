@@ -81,32 +81,6 @@ class StatistikController extends Controller
             ->orderBy('total', 'desc')
             ->get();
 
-        // Statistik bantuan sosial
-        $statBantuanSosial = [
-            'pkh' => CalonSiswa::whereNotNull('pkh')->where('pkh', '!=', '')->count(),
-            'kks' => CalonSiswa::whereNotNull('kks')->where('kks', '!=', '')->count(),
-            'pip' => CalonSiswa::whereNotNull('pip')->where('pip', '!=', '')->count(),
-        ];
-        $statBantuanSosial['any'] = CalonSiswa::where(function ($query) {
-            $query->whereNotNull('pkh')->where('pkh', '!=', '')
-                ->orWhereNotNull('kks')->where('kks', '!=', '')
-                ->orWhereNotNull('pip')->where('pip', '!=', '');
-        })->count();
-
-        $sosialEkonomiMap = [
-            'Tinggi' => ['PNS/TNI/POLRI', 'Karyawan Swasta', 'Pedagang Besar', 'Wiraswasta', 'Wirausaha'],
-            'Menengah' => ['Petani', 'Peternak', 'Nelayan', 'Pedagang Kecil', 'Buruh', 'Pensiunan'],
-            'Lainnya' => ['Tidak Bekerja', 'Lainnya'],
-        ];
-
-        $statPekerjaanAyahSegment = collect($sosialEkonomiMap)->mapWithKeys(function ($jobs, $segment) {
-            return [$segment => CalonSiswa::whereIn('pekerjaan_ayah', $jobs)->count()];
-        });
-
-        $statPekerjaanIbuSegment = collect($sosialEkonomiMap)->mapWithKeys(function ($jobs, $segment) {
-            return [$segment => CalonSiswa::whereIn('pekerjaan_ibu', $jobs)->count()];
-        });
-
         // Statistik berdasarkan asal sekolah
         $statSekolah = CalonSiswa::select('sekolah_asal', DB::raw('count(*) as total'))
             ->groupBy('sekolah_asal')
@@ -177,6 +151,48 @@ class StatistikController extends Controller
             }
         }
 
+        // Statistik Segmen Sosial Ekonomi (PKH, KKS, PIP)
+        $totalPendaftar = CalonSiswa::count();
+        $statSosialEkonomi = [
+            'pkh' => [
+                'ya' => CalonSiswa::whereNotNull('pkh')->where('pkh', '!=', '')->count(),
+                'tidak' => CalonSiswa::whereNull('pkh')->orWhere('pkh', '')->count(),
+                'total' => $totalPendaftar
+            ],
+            'kks' => [
+                'ya' => CalonSiswa::whereNotNull('kks')->where('kks', '!=', '')->count(),
+                'tidak' => CalonSiswa::whereNull('kks')->orWhere('kks', '')->count(),
+                'total' => $totalPendaftar
+            ],
+            'pip' => [
+                'ya' => CalonSiswa::whereNotNull('pip')->where('pip', '!=', '')->count(),
+                'tidak' => CalonSiswa::whereNull('pip')->orWhere('pip', '')->count(),
+                'total' => $totalPendaftar
+            ]
+        ];
+
+        // Breakdown per jenis kelamin untuk PKH, KKS, PIP
+        $statSosialEkonomiJk = [
+            'pkh' => CalonSiswa::whereNotNull('pkh')
+                ->where('pkh', '!=', '')
+                ->select('jenis_kelamin', DB::raw('count(*) as total'))
+                ->groupBy('jenis_kelamin')
+                ->pluck('total', 'jenis_kelamin')
+                ->toArray(),
+            'kks' => CalonSiswa::whereNotNull('kks')
+                ->where('kks', '!=', '')
+                ->select('jenis_kelamin', DB::raw('count(*) as total'))
+                ->groupBy('jenis_kelamin')
+                ->pluck('total', 'jenis_kelamin')
+                ->toArray(),
+            'pip' => CalonSiswa::whereNotNull('pip')
+                ->where('pip', '!=', '')
+                ->select('jenis_kelamin', DB::raw('count(*) as total'))
+                ->groupBy('jenis_kelamin')
+                ->pluck('total', 'jenis_kelamin')
+                ->toArray()
+        ];
+
         return view('statistik.index', compact(
             'tahunAjaran',
             'selectedTahun',
@@ -188,9 +204,6 @@ class StatistikController extends Controller
             'statPendidikanAyah',
             'statPekerjaanIbu',
             'statPendidikanIbu',
-            'statBantuanSosial',
-            'statPekerjaanAyahSegment',
-            'statPekerjaanIbuSegment',
             'statSekolah',
             'statAlamat',
             'statUkuranBaju',
@@ -198,7 +211,9 @@ class StatistikController extends Controller
             'bulan',
             'pendaftarPerBulan',
             'statJkTahun',
-            'statAgamaTahun'
+            'statAgamaTahun',
+            'statSosialEkonomi',
+            'statSosialEkonomiJk'
         ));
     }
 }
