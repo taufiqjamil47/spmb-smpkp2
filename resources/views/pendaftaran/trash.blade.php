@@ -7,11 +7,6 @@
         <!-- Header Section with Gradient -->
         <div
             class="mb-8 bg-gradient-to-r from-red-600 to-orange-600 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
-            {{-- <div class="absolute top-0 right-0 opacity-10">
-                <svg class="w-64 h-64" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L15 8.5L22 9.5L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9.5L9 8.5L12 2Z" />
-                </svg>
-            </div> --}}
             <div class="absolute bottom-0 left-0 opacity-5">
                 <i class="fas fa-trash-alt text-8xl mb-2"></i>
             </div>
@@ -22,22 +17,14 @@
                         <p class="text-red-100">Data yang telah dihapus sementara (soft delete) - masih dapat dipulihkan</p>
                     </div>
                     <div class="flex space-x-3 flex-wrap gap-2">
-                        <form action="{{ route('pendaftaran.restore-all') }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" onclick="return confirm('Kembalikan semua data?')"
-                                class="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
-                                <i class="fas fa-undo mr-2"></i>Restore All
-                            </button>
-                        </form>
-                        <form action="{{ route('pendaftaran.empty-trash') }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                onclick="return confirm('Hapus permanen semua data? Tindakan ini tidak dapat dibatalkan!')"
-                                class="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
-                                <i class="fas fa-trash-alt mr-2"></i>Empty Trash
-                            </button>
-                        </form>
+                        <button type="button" id="restoreAllBtn"
+                            class="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
+                            <i class="fas fa-undo mr-2"></i>Restore All
+                        </button>
+                        <button type="button" id="emptyTrashBtn"
+                            class="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
+                            <i class="fas fa-trash-alt mr-2"></i>Empty Trash
+                        </button>
                         <a href="{{ route('pendaftaran.index') }}"
                             class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
                             <i class="fas fa-arrow-left mr-2"></i>Kembali
@@ -102,7 +89,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($pendaftar as $index => $siswa)
-                            <tr class="hover:bg-red-50 transition-colors group">
+                            <tr class="hover:bg-red-50 transition-colors group" data-student-id="{{ $siswa->id }}">
                                 <td class="px-6 py-4">
                                     <span class="font-semibold text-gray-700">{{ $pendaftar->firstItem() + $index }}</span>
                                 </td>
@@ -112,6 +99,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="font-semibold text-gray-900">{{ $siswa->nama_lengkap }}</div>
+                                    <div class="text-xs text-gray-500 mt-1">{{ $siswa->nisn ?? '-' }}</div>
                                 </td>
                                 <td class="px-6 py-4 font-mono text-sm text-gray-700">{{ $siswa->nisn }}</td>
                                 <td class="px-6 py-4">
@@ -128,27 +116,19 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex space-x-1.5">
-                                        <form action="{{ route('pendaftaran.restore', $siswa->id) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                class="text-green-600 hover:text-white hover:bg-green-600 p-2 rounded-lg transition-all"
-                                                title="Kembalikan data" onclick="return confirm('Kembalikan data ini?')">
-                                                <i class="fas fa-undo"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                            class="restore-btn text-green-600 hover:text-white hover:bg-green-600 p-2 rounded-lg transition-all"
+                                            data-id="{{ $siswa->id }}" data-name="{{ $siswa->nama_lengkap }}"
+                                            data-no-peserta="{{ $siswa->no_peserta }}" title="Kembalikan data">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
 
-                                        <form action="{{ route('pendaftaran.force-delete', $siswa->id) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
-                                                title="Hapus permanen"
-                                                onclick="return confirm('Hapus permanen data ini? Tindakan ini tidak dapat dibatalkan!')">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                            class="force-delete-btn text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
+                                            data-id="{{ $siswa->id }}" data-name="{{ $siswa->nama_lengkap }}"
+                                            data-no-peserta="{{ $siswa->no_peserta }}" title="Hapus permanen">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
 
                                         <a href="{{ route('pendaftaran.show', $siswa->id) }}"
                                             class="text-blue-600 hover:text-white hover:bg-blue-600 p-2 rounded-lg transition-all"
@@ -156,6 +136,20 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </div>
+
+                                    <!-- Hidden forms untuk aksi individual -->
+                                    <form id="restore-form-{{ $siswa->id }}"
+                                        action="{{ route('pendaftaran.restore', $siswa->id) }}" method="POST"
+                                        class="hidden">
+                                        @csrf
+                                    </form>
+
+                                    <form id="force-delete-form-{{ $siswa->id }}"
+                                        action="{{ route('pendaftaran.force-delete', $siswa->id) }}" method="POST"
+                                        class="hidden">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
                                 </td>
                             </tr>
                         @empty
@@ -227,6 +221,16 @@
         </div>
     </div>
 
+    <!-- Hidden forms untuk bulk actions -->
+    <form id="restore-all-form" action="{{ route('pendaftaran.restore-all') }}" method="POST" class="hidden">
+        @csrf
+    </form>
+
+    <form id="empty-trash-form" action="{{ route('pendaftaran.empty-trash') }}" method="POST" class="hidden">
+        @csrf
+        @method('DELETE')
+    </form>
+
     @push('styles')
         <style>
             /* Custom Pagination Styling */
@@ -263,5 +267,232 @@
                 cursor: not-allowed;
             }
         </style>
+    @endpush
+
+    @push('scripts')
+        <!-- Load SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            // Restore button handlers (individual)
+            document.querySelectorAll('.restore-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const studentId = this.dataset.id;
+                    const studentName = this.dataset.name;
+                    const studentNoPeserta = this.dataset.noPeserta;
+
+                    Swal.fire({
+                        title: 'Kembalikan Data?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan mengembalikan data siswa berikut ke daftar aktif:</p>
+                                <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                                    <p class="font-semibold text-gray-800">${studentName}</p>
+                                    <p class="text-sm text-gray-500 font-mono">No. Peserta: ${studentNoPeserta}</p>
+                                </div>
+                                <div class="bg-green-50 border-l-4 border-green-400 p-3 mt-2">
+                                    <p class="text-sm text-green-700">
+                                        <i class="fas fa-info-circle mr-1"></i> 
+                                        Data akan dikembalikan ke daftar pendaftar aktif.
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10B981',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Kembalikan!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById(`restore-form-${studentId}`);
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Force Delete button handlers (individual permanent delete)
+            document.querySelectorAll('.force-delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const studentId = this.dataset.id;
+                    const studentName = this.dataset.name;
+                    const studentNoPeserta = this.dataset.noPeserta;
+
+                    Swal.fire({
+                        title: 'Hapus Permanen?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan menghapus data siswa berikut secara permanen:</p>
+                                <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                                    <p class="font-semibold text-gray-800">${studentName}</p>
+                                    <p class="text-sm text-gray-500 font-mono">No. Peserta: ${studentNoPeserta}</p>
+                                </div>
+                                <div class="bg-red-50 border-l-4 border-red-400 p-3 mt-2">
+                                    <p class="text-sm text-red-700 font-semibold">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> 
+                                        PERINGATAN!
+                                    </p>
+                                    <p class="text-sm text-red-600 mt-1">
+                                        Data akan dihapus secara permanen dari database dan TIDAK DAPAT DIKEMBALIKAN!
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Hapus Permanen!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById(
+                                    `force-delete-form-${studentId}`);
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Restore All button handler
+            const restoreAllBtn = document.getElementById('restoreAllBtn');
+            if (restoreAllBtn) {
+                restoreAllBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Kembalikan Semua Data?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan mengembalikan SEMUA data yang ada di trash ke daftar aktif.</p>
+                                <div class="bg-green-50 border-l-4 border-green-400 p-3 mt-2">
+                                    <p class="text-sm text-green-700">
+                                        <i class="fas fa-info-circle mr-1"></i> 
+                                        Semua data siswa di trash akan dikembalikan ke daftar pendaftar aktif.
+                                    </p>
+                                </div>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-2">
+                                    <p class="text-sm text-yellow-700">
+                                        <i class="fas fa-clock mr-1"></i> 
+                                        Proses ini mungkin memerlukan waktu jika jumlah data banyak.
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10B981',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Kembalikan Semua!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById('restore-all-form');
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Empty Trash button handler
+            const emptyTrashBtn = document.getElementById('emptyTrashBtn');
+            if (emptyTrashBtn) {
+                emptyTrashBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Kosongkan Trash?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan menghapus SEMUA data di trash secara permanen.</p>
+                                <div class="bg-red-50 border-l-4 border-red-400 p-3 mb-3">
+                                    <p class="text-sm text-red-700 font-semibold">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> 
+                                        PERINGATAN SERIUS!
+                                    </p>
+                                    <p class="text-sm text-red-600 mt-1">
+                                        Tindakan ini akan menghapus SEMUA data siswa yang ada di trash secara permanen!
+                                    </p>
+                                    <p class="text-sm text-red-600 mt-1 font-bold">
+                                        Data yang dihapus tidak dapat dikembalikan lagi!
+                                    </p>
+                                </div>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-2">
+                                    <p class="text-sm text-yellow-700">
+                                        <i class="fas fa-clock mr-1"></i> 
+                                        Jumlah data yang akan dihapus: <strong>{{ $pendaftar->total() }}</strong> siswa
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Kosongkan Trash!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById('empty-trash-form');
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Flash message notifications
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#10B981',
+                    timer: 3000,
+                    showConfirmButton: true
+                });
+            @endif
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#EF4444'
+                });
+            @endif
+
+            @if (session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan!',
+                    text: '{{ session('warning') }}',
+                    confirmButtonColor: '#F59E0B'
+                });
+            @endif
+        </script>
     @endpush
 @endsection

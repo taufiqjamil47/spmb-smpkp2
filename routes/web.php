@@ -25,6 +25,8 @@ Route::middleware(['auth'])->group(function () {
     // ------------------------------------------------------------------------
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/api/total-students', [DashboardController::class, 'apiTotalStudents'])->name('dashboard.api.total-students');
+    // Tambahkan route ini di dalam route group yang sesuai
+    Route::get('/dashboard/chart-data', [DashboardController::class, 'apiChartData'])->name('dashboard.api.chart');
     // Statistik
     Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
 

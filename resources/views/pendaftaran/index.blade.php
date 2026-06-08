@@ -33,7 +33,6 @@
                                     <i class="fas fa-chevron-down ml-2 text-xs"></i>
                                 </button>
 
-                                <!-- PERBAIKAN: Mengubah z-999 menjadi z-50 agar z-index Tailwind berfungsi valid -->
                                 <div x-show="open" @click.away="open = false" x-transition
                                     class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl z-50 border border-gray-100 overflow-hidden">
                                     <div class="p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
@@ -43,7 +42,6 @@
                                     </div>
 
                                     <div class="p-2">
-                                        <!-- PERBAIKAN: Menambahkan @submit="open = false" agar transisi penutupan menu lebih halus saat diklik -->
                                         <form action="{{ route('export.excel') }}" method="GET" class="mb-1"
                                             @submit="open = false">
                                             <input type="hidden" name="tahun" value="{{ request('tahun') }}">
@@ -208,7 +206,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($pendaftar as $index => $siswa)
-                            <tr class="hover:bg-blue-50 transition-colors group">
+                            <tr class="hover:bg-blue-50 transition-colors group" data-student-id="{{ $siswa->id }}">
                                 <td class="px-6 py-4">
                                     <span
                                         class="font-semibold text-gray-700">{{ $pendaftar->firstItem() + $index }}</span>
@@ -252,18 +250,23 @@
                                         @endif
 
                                         @if (auth()->user()->role === 'admin')
-                                            <form action="{{ route('pendaftaran.destroy', $siswa->id) }}" method="POST"
-                                                class="inline" onsubmit="return confirm('Pindahkan data ini ke trash?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
-                                                    title="Hapus (pindah ke trash)">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                class="delete-btn text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
+                                                data-id="{{ $siswa->id }}" data-name="{{ $siswa->nama_lengkap }}"
+                                                data-no-peserta="{{ $siswa->no_peserta }}"
+                                                title="Hapus (pindah ke trash)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         @endif
                                     </div>
+
+                                    <!-- Hidden form untuk delete -->
+                                    <form id="delete-form-{{ $siswa->id }}"
+                                        action="{{ route('pendaftaran.destroy', $siswa->id) }}" method="POST"
+                                        class="hidden">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
                                 </td>
                             </tr>
                         @empty
@@ -340,5 +343,97 @@
                 cursor: not-allowed;
             }
         </style>
+    @endpush
+
+    @push('scripts')
+        <!-- Load SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            // Delete button handlers with SweetAlert
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const studentId = this.dataset.id;
+                    const studentName = this.dataset.name;
+                    const studentNoPeserta = this.dataset.noPeserta;
+
+                    Swal.fire({
+                        title: 'Pindahkan ke Trash?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan memindahkan data pendaftar berikut ke trash:</p>
+                                <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                                    <p class="font-semibold text-gray-800">${studentName}</p>
+                                    <p class="text-sm text-gray-500 font-mono">No. Peserta: ${studentNoPeserta}</p>
+                                </div>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-2">
+                                    <p class="text-sm text-yellow-800">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> 
+                                        Data akan dipindahkan ke trash dan tidak akan tampil di daftar utama. 
+                                        Anda masih dapat memulihkannya nanti.
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Pindahkan!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById(`delete-form-${studentId}`);
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Flash message notifications
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#3B82F6',
+                    timer: 3000,
+                    showConfirmButton: true
+                });
+            @endif
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#EF4444'
+                });
+            @endif
+
+            @if (session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan!',
+                    text: '{{ session('warning') }}',
+                    confirmButtonColor: '#F59E0B'
+                });
+            @endif
+
+            @if (session('info'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Informasi',
+                    text: '{{ session('info') }}',
+                    confirmButtonColor: '#3B82F6'
+                });
+            @endif
+        </script>
     @endpush
 @endsection

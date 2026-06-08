@@ -7,11 +7,6 @@
         <!-- Header Section with Gradient -->
         <div
             class="mb-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
-            {{-- <div class="absolute top-0 right-0 opacity-10">
-                <svg class="w-64 h-64" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L15 8.5L22 9.5L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9.5L9 8.5L12 2Z" />
-                </svg>
-            </div> --}}
             <div class="relative z-10">
                 <div class="flex justify-between items-center flex-wrap gap-4">
                     <div>
@@ -170,11 +165,11 @@
         <!-- Bulk Actions -->
         @if ($groupings->count() > 0 && request('status') == 'pending')
             <div class="mb-5 flex gap-3">
-                <button onclick="bulkApprove()"
+                <button type="button" id="bulkApproveBtn"
                     class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
                     <i class="fas fa-check mr-2"></i> Approve Selected
                 </button>
-                <button onclick="bulkReject()"
+                <button type="button" id="bulkRejectBtn"
                     class="bg-gradient-to-r from-red-500 to-red-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
                     <i class="fas fa-times mr-2"></i> Reject Selected
                 </button>
@@ -211,7 +206,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse($groupings as $group)
-                            <tr class="hover:bg-purple-50 transition-colors group">
+                            <tr class="hover:bg-purple-50 transition-colors group" data-group-id="{{ $group->id }}">
                                 @if (request('status') == 'pending')
                                     <td class="px-4 py-4">
                                         <input type="checkbox"
@@ -277,41 +272,50 @@
                                         </a>
 
                                         @if ($group->status == 'pending')
-                                            <form action="{{ route('groupings.approve', $group->id) }}" method="POST"
-                                                class="inline">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="text-green-600 hover:text-white hover:bg-green-600 p-2 rounded-lg transition-all"
-                                                    onclick="return confirm('Setujui grouping ini?')" title="Setujui">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                class="approve-btn text-green-600 hover:text-white hover:bg-green-600 p-2 rounded-lg transition-all"
+                                                data-id="{{ $group->id }}" data-code="{{ $group->request_code }}"
+                                                title="Setujui">
+                                                <i class="fas fa-check"></i>
+                                            </button>
 
-                                            <form action="{{ route('groupings.reject', $group->id) }}" method="POST"
-                                                class="inline">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
-                                                    onclick="return confirm('Tolak grouping ini?')" title="Tolak">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                class="reject-btn text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
+                                                data-id="{{ $group->id }}" data-code="{{ $group->request_code }}"
+                                                title="Tolak">
+                                                <i class="fas fa-times"></i>
+                                            </button>
                                         @endif
 
                                         @if ($group->status != 'approved')
-                                            <form action="{{ route('groupings.destroy', $group->id) }}" method="POST"
-                                                class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
-                                                    onclick="return confirm('Hapus grouping ini? Siswa akan terlepas dari grup.')"
-                                                    title="Hapus">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                class="delete-btn text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
+                                                data-id="{{ $group->id }}" data-name="{{ $group->group_name }}"
+                                                title="Hapus">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         @endif
                                     </div>
+
+                                    <!-- Hidden forms untuk aksi -->
+                                    <form id="approve-form-{{ $group->id }}"
+                                        action="{{ route('groupings.approve', $group->id) }}" method="POST"
+                                        class="hidden">
+                                        @csrf
+                                    </form>
+
+                                    <form id="reject-form-{{ $group->id }}"
+                                        action="{{ route('groupings.reject', $group->id) }}" method="POST"
+                                        class="hidden">
+                                        @csrf
+                                    </form>
+
+                                    <form id="delete-form-{{ $group->id }}"
+                                        action="{{ route('groupings.destroy', $group->id) }}" method="POST"
+                                        class="hidden">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
                                 </td>
                             </tr>
                         @empty
@@ -388,16 +392,24 @@
     @endpush
 
     @push('scripts')
+        <!-- Load SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
         <script>
             let selectedIds = [];
 
-            document.getElementById('selectAll')?.addEventListener('change', function() {
-                document.querySelectorAll('.select-item').forEach(cb => {
-                    cb.checked = this.checked;
+            // Select All functionality
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    document.querySelectorAll('.select-item').forEach(cb => {
+                        cb.checked = this.checked;
+                    });
+                    updateSelectedIds();
                 });
-                updateSelectedIds();
-            });
+            }
 
+            // Individual checkbox change
             document.querySelectorAll('.select-item').forEach(cb => {
                 cb.addEventListener('change', updateSelectedIds);
             });
@@ -409,83 +421,305 @@
                 });
             }
 
-            function bulkApprove() {
-                if (selectedIds.length === 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Peringatan',
-                        text: 'Pilih minimal satu grouping request',
-                        confirmButtonColor: '#8B5CF6'
-                    });
-                    return;
-                }
+            // Approve button handlers
+            document.querySelectorAll('.approve-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const groupId = this.dataset.id;
+                    const groupCode = this.dataset.code;
 
+                    Swal.fire({
+                        title: 'Setujui Grouping?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan menyetujui grouping request dengan kode:</p>
+                                <p class="font-mono text-lg font-bold text-purple-600 bg-purple-50 p-2 rounded-lg text-center mb-3">
+                                    ${groupCode}
+                                </p>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-2">
+                                    <p class="text-sm text-yellow-800">
+                                        <i class="fas fa-info-circle"></i> Grouping yang disetujui akan digunakan dalam pembagian kelas.
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10B981',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Setujui!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById(`approve-form-${groupId}`);
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Reject button handlers
+            document.querySelectorAll('.reject-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const groupId = this.dataset.id;
+                    const groupCode = this.dataset.code;
+
+                    Swal.fire({
+                        title: 'Tolak Grouping?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan menolak grouping request dengan kode:</p>
+                                <p class="font-mono text-lg font-bold text-red-600 bg-red-50 p-2 rounded-lg text-center mb-3">
+                                    ${groupCode}
+                                </p>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Alasan Penolakan (Opsional):
+                                    </label>
+                                    <textarea id="rejectReason" class="swal2-textarea" rows="3" 
+                                        placeholder="Masukkan alasan penolakan..."></textarea>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Tolak!',
+                        cancelButtonText: 'Batal',
+                        preConfirm: () => {
+                            const reason = document.getElementById('rejectReason').value;
+                            if (reason) {
+                                const form = document.getElementById(`reject-form-${groupId}`);
+                                let input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = 'reason';
+                                input.value = reason;
+                                form.appendChild(input);
+                            }
+                            return true;
+                        },
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById(`reject-form-${groupId}`);
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Delete button handlers
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const groupId = this.dataset.id;
+                    const groupName = this.dataset.name;
+
+                    Swal.fire({
+                        title: 'Hapus Grouping?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan menghapus grouping:</p>
+                                <p class="font-semibold text-red-600 bg-red-50 p-2 rounded-lg text-center mb-3">
+                                    "${groupName}"
+                                </p>
+                                <div class="bg-red-50 border-l-4 border-red-400 p-3 mt-2">
+                                    <p class="text-sm text-red-800">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        Semua siswa dalam grup akan terlepas dan data akan dihapus permanen!
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById(`delete-form-${groupId}`);
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Bulk Approve function
+            const bulkApproveBtn = document.getElementById('bulkApproveBtn');
+            if (bulkApproveBtn) {
+                bulkApproveBtn.addEventListener('click', function() {
+                    if (selectedIds.length === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peringatan',
+                            text: 'Pilih minimal satu grouping request',
+                            confirmButtonColor: '#8B5CF6'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Setujui Grouping Massal?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan menyetujui <strong class="text-green-600">${selectedIds.length}</strong> grouping request</p>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-2">
+                                    <p class="text-sm text-yellow-800">
+                                        <i class="fas fa-info-circle"></i> Semua grouping yang disetujui akan digunakan dalam pembagian kelas.
+                                    </p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10B981',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Setujui Semua!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = '{{ route('groupings.bulk-approve') }}';
+                                form.innerHTML = `@csrf`;
+                                selectedIds.forEach(id => {
+                                    const input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = 'ids[]';
+                                    input.value = id;
+                                    form.appendChild(input);
+                                });
+                                document.body.appendChild(form);
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Bulk Reject function
+            const bulkRejectBtn = document.getElementById('bulkRejectBtn');
+            if (bulkRejectBtn) {
+                bulkRejectBtn.addEventListener('click', function() {
+                    if (selectedIds.length === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peringatan',
+                            text: 'Pilih minimal satu grouping request',
+                            confirmButtonColor: '#8B5CF6'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Tolak Grouping Massal?',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Anda akan menolak <strong class="text-red-600">${selectedIds.length}</strong> grouping request</p>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Alasan Penolakan (Opsional):
+                                    </label>
+                                    <textarea id="bulkRejectReason" class="swal2-textarea" rows="3" 
+                                        placeholder="Masukkan alasan penolakan..."></textarea>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: 'Ya, Tolak Semua!',
+                        cancelButtonText: 'Batal',
+                        preConfirm: () => {
+                            const reason = document.getElementById('bulkRejectReason').value;
+                            return {
+                                reason: reason
+                            };
+                        },
+                        showLoaderOnConfirm: true,
+                        preConfirm: async (result) => {
+                            try {
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = '{{ route('groupings.bulk-reject') }}';
+                                form.innerHTML = `@csrf`;
+                                selectedIds.forEach(id => {
+                                    const input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = 'ids[]';
+                                    input.value = id;
+                                    form.appendChild(input);
+                                });
+                                if (result.reason) {
+                                    const input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = 'reason';
+                                    input.value = result.reason;
+                                    form.appendChild(input);
+                                }
+                                document.body.appendChild(form);
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Flash message notifications
+            @if (session('success'))
                 Swal.fire({
-                    title: 'Setujui Grouping?',
-                    text: `Anda akan menyetujui ${selectedIds.length} grouping request`,
-                    icon: 'question',
-                    showCancelButton: true,
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
                     confirmButtonColor: '#10B981',
-                    cancelButtonColor: '#6B7280',
-                    confirmButtonText: 'Ya, Setujui!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '{{ route('groupings.bulk-approve') }}';
-                        form.innerHTML = `@csrf`;
-                        selectedIds.forEach(id => {
-                            const input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'ids[]';
-                            input.value = id;
-                            form.appendChild(input);
-                        });
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
+                    timer: 3000,
+                    showConfirmButton: true
                 });
-            }
+            @endif
 
-            function bulkReject() {
-                if (selectedIds.length === 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Peringatan',
-                        text: 'Pilih minimal satu grouping request',
-                        confirmButtonColor: '#8B5CF6'
-                    });
-                    return;
-                }
-
+            @if (session('error'))
                 Swal.fire({
-                    title: 'Tolak Grouping?',
-                    text: `Anda akan menolak ${selectedIds.length} grouping request`,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#EF4444',
-                    cancelButtonColor: '#6B7280',
-                    confirmButtonText: 'Ya, Tolak!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '{{ route('groupings.bulk-reject') }}';
-                        form.innerHTML = `@csrf`;
-                        selectedIds.forEach(id => {
-                            const input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'ids[]';
-                            input.value = id;
-                            form.appendChild(input);
-                        });
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#EF4444'
                 });
-            }
+            @endif
+
+            @if (session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan!',
+                    text: '{{ session('warning') }}',
+                    confirmButtonColor: '#F59E0B'
+                });
+            @endif
         </script>
     @endpush
 

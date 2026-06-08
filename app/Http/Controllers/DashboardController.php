@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\CalonSiswa;
 use App\Models\GroupingRequest;
 use App\Models\TahunAjaran;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -30,7 +32,67 @@ class DashboardController extends Controller
         $chartLabels = $dataTahunAjaran->pluck('tahun_ajaran');
         $chartData = $dataTahunAjaran->pluck('calon_siswa_count');
 
-        // Data pendaftar per bulan (untuk tahun aktif) - Optimized dengan raw query
+        // Get filter parameters
+        $filterType = $request->get('filter_type', 'monthly'); // monthly, daily, yearly
+        $selectedYear = $request->get('year', date('Y'));
+        $selectedMonth = $request->get('month', date('m'));
+        $selectedDate = $request->get('date', date('Y-m-d'));
+
+        // Data pendaftar dengan filter dinamis
+        $chartDataFiltered = [];
+        $chartLabelsFiltered = [];
+
+        if ($filterType == 'daily') {
+            // Get daily data for selected date
+            $dailyData = CalonSiswa::whereDate('created_at', $selectedDate)
+                ->selectRaw("HOUR(created_at) as jam, COUNT(*) as jumlah")
+                ->groupBy('jam')
+                ->orderBy('jam')
+                ->pluck('jumlah', 'jam')
+                ->toArray();
+
+            for ($i = 0; $i <= 23; $i++) {
+                $chartLabelsFiltered[] = sprintf("%02d:00", $i);
+                $chartDataFiltered[] = $dailyData[$i] ?? 0;
+            }
+        } elseif ($filterType == 'monthly') {
+            // Get monthly data for selected year
+            $monthlyData = CalonSiswa::whereYear('created_at', $selectedYear)
+                ->selectRaw("MONTH(created_at) as bulan, COUNT(*) as jumlah")
+                ->groupBy('bulan')
+                ->orderBy('bulan')
+                ->pluck('jumlah', 'bulan')
+                ->toArray();
+
+            $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            foreach (range(1, 12) as $bulanNum) {
+                $chartLabelsFiltered[] = $months[$bulanNum - 1];
+                $chartDataFiltered[] = $monthlyData[$bulanNum] ?? 0;
+            }
+        } else { // yearly
+            // Get yearly data for last 5 years
+            $startYear = $selectedYear - 4;
+            $yearlyData = CalonSiswa::whereYear('created_at', '>=', $startYear)
+                ->selectRaw("YEAR(created_at) as tahun, COUNT(*) as jumlah")
+                ->groupBy('tahun')
+                ->orderBy('tahun')
+                ->pluck('jumlah', 'tahun')
+                ->toArray();
+
+            for ($i = $startYear; $i <= $selectedYear; $i++) {
+                $chartLabelsFiltered[] = $i;
+                $chartDataFiltered[] = $yearlyData[$i] ?? 0;
+            }
+        }
+
+        // Get tahun ajaran options for filter (untuk dropdown tahun)
+        $availableYears = CalonSiswa::selectRaw("YEAR(created_at) as tahun")
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun')
+            ->toArray();
+
+        // Data pendaftar per bulan (untuk tahun aktif) - Keep for backward compatibility
         $pendaftarPerBulan = [];
         if ($tahunAjaranAktif) {
             $bulanData = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)
@@ -52,23 +114,15 @@ class DashboardController extends Controller
             ->get();
 
         // ========== FITUR AUTO-DETECT MUTUAL REQUEST ==========
-        // Hanya untuk admin
         $groupingStats = [];
         $mutualRequests = [];
         $pendingGroupings = collect();
 
-        // Cek apakah user adalah admin (asumsikan ada field 'role' atau similar)
-        // Sesuaikan dengan struktur user Anda
-        $isAdmin = auth()->user()->role === 'admin';
+        $isAdmin = Auth::user()->role === 'admin';
 
         if ($isAdmin) {
-            // 1. Statistik grouping
             $groupingStats = $this->getGroupingStats();
-
-            // 2. Data mutual requests yang terdeteksi
             $mutualRequests = $this->detectMutualRequests($request);
-
-            // 3. Pending groupings untuk ditampilkan
             $pendingGroupings = GroupingRequest::with(['students', 'tahunAjaran'])
                 ->where('status', 'pending')
                 ->orderBy('created_at', 'desc')
@@ -84,19 +138,84 @@ class DashboardController extends Controller
             'chartData',
             'pendaftarPerBulan',
             'recentPendaftar',
-            'groupingStats',      // TAMBAHKAN
-            'mutualRequests',     // TAMBAHKAN
-            'pendingGroupings'    // TAMBAHKAN
+            'groupingStats',
+            'mutualRequests',
+            'pendingGroupings',
+            'filterType',
+            'selectedYear',
+            'selectedMonth',
+            'selectedDate',
+            'chartLabelsFiltered',
+            'chartDataFiltered',
+            'availableYears'
         ));
     }
 
-    // Method untuk statistik grouping (sudah ada)
+    // API endpoint untuk mendapatkan data chart dinamis (untuk AJAX)
+    public function apiChartData(Request $request)
+    {
+        $filterType = $request->get('filter_type', 'monthly');
+        $selectedYear = $request->get('year', date('Y'));
+        $selectedMonth = $request->get('month', date('m'));
+        $selectedDate = $request->get('date', date('Y-m-d'));
+
+        $chartData = [];
+        $chartLabels = [];
+
+        if ($filterType == 'daily') {
+            $dailyData = CalonSiswa::whereDate('created_at', $selectedDate)
+                ->selectRaw("HOUR(created_at) as jam, COUNT(*) as jumlah")
+                ->groupBy('jam')
+                ->orderBy('jam')
+                ->pluck('jumlah', 'jam')
+                ->toArray();
+
+            for ($i = 0; $i <= 23; $i++) {
+                $chartLabels[] = sprintf("%02d:00", $i);
+                $chartData[] = $dailyData[$i] ?? 0;
+            }
+        } elseif ($filterType == 'monthly') {
+            $monthlyData = CalonSiswa::whereYear('created_at', $selectedYear)
+                ->selectRaw("MONTH(created_at) as bulan, COUNT(*) as jumlah")
+                ->groupBy('bulan')
+                ->orderBy('bulan')
+                ->pluck('jumlah', 'bulan')
+                ->toArray();
+
+            $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            foreach (range(1, 12) as $bulanNum) {
+                $chartLabels[] = $months[$bulanNum - 1];
+                $chartData[] = $monthlyData[$bulanNum] ?? 0;
+            }
+        } else {
+            $startYear = $selectedYear - 4;
+            $yearlyData = CalonSiswa::whereYear('created_at', '>=', $startYear)
+                ->selectRaw("YEAR(created_at) as tahun, COUNT(*) as jumlah")
+                ->groupBy('tahun')
+                ->orderBy('tahun')
+                ->pluck('jumlah', 'tahun')
+                ->toArray();
+
+            for ($i = $startYear; $i <= $selectedYear; $i++) {
+                $chartLabels[] = $i;
+                $chartData[] = $yearlyData[$i] ?? 0;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'labels' => $chartLabels,
+            'data' => $chartData,
+            'filter_type' => $filterType
+        ]);
+    }
+
+    // Other methods (getGroupingStats, detectMutualRequests, etc.) remain the same
     public function getGroupingStats()
     {
         $pendingGroups = GroupingRequest::where('status', 'pending')->count();
         $pendingRequests = CalonSiswa::whereNotNull('requested_with_names')->count();
 
-        // Hitung mutual request yang terdeteksi
         $mutualDetected = CalonSiswa::whereNotNull('requested_with_names')
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
@@ -105,17 +224,14 @@ class DashboardController extends Controller
                     ->whereColumn('cs2.tahun_ajaran_id', 'calon_siswas.tahun_ajaran_id');
             })->count();
 
-        // Hitung total siswa yang sudah tergabung dalam grouping
         $totalGrouped = CalonSiswa::whereNotNull('grouping_request_id')->count();
 
-        // Persentase request yang sudah diproses
         $totalRequests = $pendingRequests + GroupingRequest::count();
         $processedRequests = $totalRequests > 0 ? round(($pendingGroups / $totalRequests) * 100) : 0;
 
         return compact('pendingGroups', 'pendingRequests', 'mutualDetected', 'totalGrouped', 'processedRequests');
     }
 
-    // Method baru: Detect mutual requests dengan detail - OPTIMIZED from O(n²) to O(n)
     public function detectMutualRequests(Request $request)
     {
         $tahunAjaranId = $request->get('tahun', null);
@@ -124,16 +240,14 @@ class DashboardController extends Controller
             ->where('requested_with_names', '!=', '')
             ->with('tahunAjaran');
 
-        // Filter berdasarkan tahun ajaran jika ada
         if ($tahunAjaranId) {
             $query->where('tahun_ajaran_id', $tahunAjaranId);
         }
 
         $studentsWithRequests = $query->get();
 
-        // OPTIMIZATION: Build lookup map O(n) instead of nested loop O(n²)
-        $requestMap = [];  // Map nama -> array of students
-        $studentMap = [];  // Map student_id -> student data + parsed requests
+        $requestMap = [];
+        $studentMap = [];
 
         foreach ($studentsWithRequests as $student) {
             $studentUpper = strtoupper($student->nama_lengkap);
@@ -141,14 +255,12 @@ class DashboardController extends Controller
             $requestedNames = array_map('trim', $requestedNames);
             $requestedNames = array_map('strtoupper', $requestedNames);
 
-            // Store student with parsed requests
             $studentMap[$student->id] = [
                 'student' => $student,
                 'requested_names' => $requestedNames,
                 'requested_names_upper' => $requestedNames
             ];
 
-            // Build reverse lookup: for each requested name, track who requested it
             foreach ($requestedNames as $name) {
                 if (!isset($requestMap[$name])) {
                     $requestMap[$name] = [];
@@ -159,14 +271,11 @@ class DashboardController extends Controller
 
         $mutualPairs = [];
 
-        // Check for mutual matches using the lookup map O(n)
         foreach ($studentMap as $studentId => $studentData) {
             $student = $studentData['student'];
             $requestedNames = $studentData['requested_names'];
 
-            // For each student this person requested
             foreach ($requestedNames as $requestedName) {
-                // Check if anyone matching this name also requested this student back
                 if (isset($requestMap[$requestedName])) {
                     foreach ($requestMap[$requestedName] as $potentialMatchId) {
                         if ($studentId === $potentialMatchId) continue;
@@ -177,11 +286,9 @@ class DashboardController extends Controller
 
                         if (!$potentialMatch) continue;
 
-                        // Check if potentialMatch also requested this student
                         $potentialMatchWants = in_array(strtoupper($student->nama_lengkap), $studentMap[$potentialMatchId]['requested_names']);
 
                         if ($potentialMatchWants) {
-                            // Found mutual pair
                             $pairKey = min($studentId, $potentialMatchId) . '-' . max($studentId, $potentialMatchId);
 
                             if (!isset($mutualPairs[$pairKey])) {
@@ -198,11 +305,9 @@ class DashboardController extends Controller
             }
         }
 
-        // Convert ke array untuk view
         return array_values($mutualPairs);
     }
 
-    // API endpoint untuk AJAX refresh mutual requests
     public function apiMutualRequests(Request $request)
     {
         $mutualRequests = $this->detectMutualRequests($request);
@@ -214,7 +319,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    // API endpoint untuk total siswa secara real-time
     public function apiTotalStudents()
     {
         return response()->json([
@@ -223,7 +327,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    // API endpoint untuk create grouping dari mutual request
     public function createGroupingFromMutual(Request $request)
     {
         $request->validate([
@@ -252,14 +355,13 @@ class DashboardController extends Controller
                 'tahun_ajaran_id' => $tahunAjaranId,
                 'status' => 'pending',
                 'notes' => 'Auto-detected mutual request - ' . now()->format('d/m/Y H:i'),
-                'created_by' => auth()->id(),
+                'created_by' => Auth::id(),
             ]);
 
-            // Update semua siswa dalam grup
             CalonSiswa::whereIn('id', $request->student_ids)->update([
                 'grouping_request_id' => $grouping->id,
                 'grouping_priority' => 'high',
-                'requested_with_names' => null // Clear karena sudah diproses
+                'requested_with_names' => null
             ]);
 
             DB::commit();

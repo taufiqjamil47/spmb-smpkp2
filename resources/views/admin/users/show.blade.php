@@ -127,17 +127,19 @@
                             {{ __('Edit') }}
                         </a>
 
-                        <form method="POST" action="{{ route('users.destroy', $user->id) }}"
-                            onsubmit="return confirm('Yakin hapus user ini? Tindakan ini tidak dapat dibatalkan.');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
-                                <i class="fas fa-trash-alt"></i>
-                                {{ __('Hapus') }}
-                            </button>
-                        </form>
+                        <button type="button" id="deleteUserBtn"
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
+                            <i class="fas fa-trash-alt"></i>
+                            {{ __('Hapus') }}
+                        </button>
                     </div>
+
+                    <!-- Hidden form untuk delete -->
+                    <form id="deleteUserForm" method="POST" action="{{ route('users.destroy', $user->id) }}"
+                        class="hidden">
+                        @csrf
+                        @method('DELETE')
+                    </form>
 
                     <!-- Info Box -->
                     <div class="p-4 bg-blue-50 border-t border-gray-200">
@@ -150,4 +152,137 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <!-- Load SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            // Delete button handler with SweetAlert
+            const deleteBtn = document.getElementById('deleteUserBtn');
+            const isSelf = {{ $user->id === auth()->id() ? 'true' : 'false' }};
+            const userName = '{{ $user->name }}';
+            const userEmail = '{{ $user->email }}';
+            const userRole = '{{ $user->role }}';
+
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    let warningHtml = `
+                        <div class="text-left">
+                            <p class="mb-3">Anda akan menghapus user berikut:</p>
+                            <div class="bg-gray-50 rounded-lg p-3 mb-3">
+                                <p class="font-semibold text-gray-800">${userName}</p>
+                                <p class="text-sm text-gray-500">Email: ${userEmail}</p>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Role: 
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${userRole === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}">
+                                        ${userRole === 'admin' ? '<i class="fas fa-crown mr-1"></i>' : '<i class="fas fa-user-check mr-1"></i>'}
+                                        ${userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                                    </span>
+                                </p>
+                            </div>
+                    `;
+
+                    if (isSelf) {
+                        warningHtml += `
+                            <div class="bg-red-50 border-l-4 border-red-500 p-3 mt-2">
+                                <div class="flex items-start">
+                                    <i class="fas fa-exclamation-triangle text-red-600 mr-2 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm text-red-700 font-semibold">
+                                            PERINGATAN PENTING!
+                                        </p>
+                                        <p class="text-sm text-red-600 mt-1">
+                                            Anda sedang mencoba menghapus akun Anda sendiri (akun yang sedang aktif).
+                                        </p>
+                                        <p class="text-sm text-red-600 mt-1 font-semibold">
+                                            Tindakan ini akan:
+                                        </p>
+                                        <ul class="text-sm text-red-600 mt-1 list-disc list-inside">
+                                            <li>Menghapus akun Anda secara permanen</li>
+                                            <li>Menghapus semua data yang terkait dengan akun Anda</li>
+                                            <li>Mengeluarkan Anda dari sistem</li>
+                                            <li>Tidak dapat dikembalikan!</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        warningHtml += `
+                            <div class="bg-red-50 border-l-4 border-red-400 p-3 mt-2">
+                                <div class="flex items-start">
+                                    <i class="fas fa-exclamation-triangle text-red-600 mr-2 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm text-red-700 font-semibold">
+                                            PERINGATAN!
+                                        </p>
+                                        <p class="text-sm text-red-600 mt-1">
+                                            Data user akan dihapus secara permanen dari sistem dan tidak dapat dikembalikan!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    warningHtml += `</div>`;
+
+                    Swal.fire({
+                        title: isSelf ? 'Hapus Akun Sendiri?' : 'Hapus User?',
+                        html: warningHtml,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF4444',
+                        cancelButtonColor: '#6B7280',
+                        confirmButtonText: isSelf ? 'Ya, Hapus Akun Saya!' : 'Ya, Hapus User!',
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        allowOutsideClick: () => !Swal.isLoading(),
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById('deleteUserForm');
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Flash message notifications with SweetAlert
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#3B82F6',
+                    timer: 3000,
+                    showConfirmButton: true
+                });
+            @endif
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#EF4444'
+                });
+            @endif
+
+            @if (session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan!',
+                    text: '{{ session('warning') }}',
+                    confirmButtonColor: '#F59E0B'
+                });
+            @endif
+        </script>
+    @endpush
 @endsection

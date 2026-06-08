@@ -7,11 +7,6 @@
         <!-- Header Section with Gradient -->
         <div
             class="mb-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
-            {{-- <div class="absolute top-0 right-0 opacity-10">
-                <svg class="w-64 h-64" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L15 8.5L22 9.5L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9.5L9 8.5L12 2Z" />
-                </svg>
-            </div> --}}
             <div class="relative z-10">
                 <div class="flex justify-between items-center flex-wrap gap-4">
                     <div>
@@ -29,20 +24,25 @@
                         </a>
 
                         @if ($grouping->status == 'pending')
-                            <form action="{{ route('groupings.approve', $grouping->id) }}" method="POST" class="inline">
+                            <button type="button" id="approveBtn"
+                                class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
+                                <i class="fas fa-check mr-2"></i> Setujui
+                            </button>
+
+                            <button type="button" id="rejectBtn"
+                                class="bg-gradient-to-r from-red-500 to-red-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
+                                <i class="fas fa-times mr-2"></i> Tolak
+                            </button>
+
+                            <!-- Hidden forms untuk approve dan reject -->
+                            <form id="approveForm" action="{{ route('groupings.approve', $grouping->id) }}" method="POST"
+                                class="hidden">
                                 @csrf
-                                <button type="submit"
-                                    class="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
-                                    <i class="fas fa-check mr-2"></i> Setujui
-                                </button>
                             </form>
 
-                            <form action="{{ route('groupings.reject', $grouping->id) }}" method="POST" class="inline">
+                            <form id="rejectForm" action="{{ route('groupings.reject', $grouping->id) }}" method="POST"
+                                class="hidden">
                                 @csrf
-                                <button type="submit"
-                                    class="bg-gradient-to-r from-red-500 to-red-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
-                                    <i class="fas fa-times mr-2"></i> Tolak
-                                </button>
                             </form>
                         @endif
                     </div>
@@ -50,9 +50,11 @@
             </div>
         </div>
 
+        <!-- Rest of your content remains the same -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Info Grouping -->
             <div class="lg:col-span-1">
+                <!-- ... konten informasi grup tetap sama ... -->
                 <div class="bg-white rounded-2xl shadow-xl overflow-hidden sticky top-6">
                     <div class="bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-4 border-b border-purple-100">
                         <h2 class="text-lg font-bold text-gray-800">
@@ -267,12 +269,12 @@
                                                 @if ($grouping->status != 'approved')
                                                     <form
                                                         action="{{ route('groupings.remove-student', [$grouping->id, $student->id]) }}"
-                                                        method="POST" class="inline">
+                                                        method="POST" class="inline"
+                                                        onsubmit="return confirmRemoveStudent(this)">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"
                                                             class="text-red-600 hover:text-white hover:bg-red-600 p-2 rounded-lg transition-all"
-                                                            onclick="return confirm('Keluarkan siswa dari grup ini?')"
                                                             title="Keluarkan dari Grup">
                                                             <i class="fas fa-user-minus"></i>
                                                         </button>
@@ -308,47 +310,151 @@
     </div>
 
     @push('scripts')
+        <!-- Pastikan SweetAlert2 sudah dimuat -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
         <script>
-            // SweetAlert confirmation for approve and reject
-            document.querySelectorAll('form[action*="approve"]').forEach(form => {
-                form.addEventListener('submit', function(e) {
+            // Fungsi untuk konfirmasi remove student
+            window.confirmRemoveStudent = function(formElement) {
+                Swal.fire({
+                    title: 'Keluarkan Siswa?',
+                    text: 'Apakah Anda yakin ingin mengeluarkan siswa ini dari grup?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#EF4444',
+                    cancelButtonColor: '#6B7280',
+                    confirmButtonText: 'Ya, Keluarkan!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        formElement.submit();
+                    }
+                });
+                return false; // Mencegah submit langsung
+            };
+
+            // Event handler untuk tombol Approve
+            const approveBtn = document.getElementById('approveBtn');
+            if (approveBtn) {
+                approveBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     Swal.fire({
                         title: 'Setujui Grouping?',
-                        text: 'Grouping yang disetujui akan digunakan dalam pembagian kelas',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Grouping yang disetujui akan digunakan dalam pembagian kelas.</p>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-2">
+                                    <p class="text-sm text-yellow-800">
+                                        <i class="fas fa-info-circle"></i> Pastikan data siswa sudah benar sebelum menyetujui.
+                                    </p>
+                                </div>
+                            </div>
+                        `,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: '#10B981',
                         cancelButtonColor: '#6B7280',
                         confirmButtonText: 'Ya, Setujui!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            this.submit();
-                        }
+                        cancelButtonText: 'Batal',
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById('approveForm');
+                                // Submit form secara manual
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
                     });
                 });
-            });
+            }
 
-            document.querySelectorAll('form[action*="reject"]').forEach(form => {
-                form.addEventListener('submit', function(e) {
+            // Event handler untuk tombol Reject
+            const rejectBtn = document.getElementById('rejectBtn');
+            if (rejectBtn) {
+                rejectBtn.addEventListener('click', function(e) {
                     e.preventDefault();
+
+                    // Tampilkan input untuk alasan penolakan (opsional)
                     Swal.fire({
                         title: 'Tolak Grouping?',
-                        text: 'Grouping yang ditolak tidak akan digunakan',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Grouping yang ditolak tidak akan digunakan dalam pembagian kelas.</p>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Alasan Penolakan (Opsional):
+                                    </label>
+                                    <textarea id="rejectReason" class="swal2-textarea" rows="3" 
+                                        placeholder="Masukkan alasan penolakan..."></textarea>
+                                </div>
+                            </div>
+                        `,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#EF4444',
                         cancelButtonColor: '#6B7280',
                         confirmButtonText: 'Ya, Tolak!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            this.submit();
+                        cancelButtonText: 'Batal',
+                        preConfirm: () => {
+                            const reason = document.getElementById('rejectReason').value;
+                            // Simpan reason ke dalam form jika perlu
+                            if (reason) {
+                                const form = document.getElementById('rejectForm');
+                                let input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = 'reason';
+                                input.value = reason;
+                                form.appendChild(input);
+                            }
+                            return true;
+                        },
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            try {
+                                const form = document.getElementById('rejectForm');
+                                form.submit();
+                                return true;
+                            } catch (error) {
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            }
                         }
                     });
                 });
-            });
+            }
+
+            // Notifikasi flash message jika ada session data
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#10B981',
+                    timer: 3000,
+                    showConfirmButton: true
+                });
+            @endif
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#EF4444'
+                });
+            @endif
+
+            @if (session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan!',
+                    text: '{{ session('warning') }}',
+                    confirmButtonColor: '#F59E0B'
+                });
+            @endif
         </script>
     @endpush
 @endsection

@@ -406,22 +406,138 @@
                 </div>
             </div>
 
-            <!-- Grafik Pendaftar per Bulan dengan Desain Premium -->
-            <div class="grid grid-cols-1 gap-8 mb-8">
-                <div class="bg-white rounded-2xl shadow-xl p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Grafik Pendaftar</h2>
-                            <p class="text-gray-500 text-sm">{{ $tahunAjaranAktif->tahun_ajaran }}</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
-                            <span class="text-xs text-gray-600">Jumlah Pendaftar</span>
-                        </div>
+            <!-- Grafik Pendaftar Dinamis dengan Filter -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Grafik Pendaftar</h2>
+                        <p class="text-gray-500 text-sm">Visualisasi data pendaftar berdasarkan periode yang dipilih</p>
                     </div>
 
-                    <div class="h-80">
-                        <canvas id="chartPerBulan" class="w-full h-full"></canvas>
+                    <!-- Filter Controls -->
+                    <div class="flex flex-wrap gap-3">
+                        <div class="relative">
+                            <select id="filterType"
+                                class="appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-2 pr-8 cursor-pointer">
+                                <option value="daily" {{ $filterType == 'daily' ? 'selected' : '' }}>📅 Harian</option>
+                                <option value="monthly" {{ $filterType == 'monthly' ? 'selected' : '' }}>📊 Bulanan
+                                </option>
+                                <option value="yearly" {{ $filterType == 'yearly' ? 'selected' : '' }}>📈 Tahunan</option>
+                            </select>
+                            <div
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+
+                        <div id="yearFilter" class="relative"
+                            style="{{ $filterType == 'yearly' ? 'display: none;' : '' }}">
+                            <select id="yearSelect"
+                                class="appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-2 pr-8 cursor-pointer">
+                                @foreach ($availableYears as $year)
+                                    <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
+                                        {{ $year }}</option>
+                                @endforeach
+                            </select>
+                            <div
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+
+                        <div id="monthFilter" class="relative"
+                            style="{{ $filterType != 'daily' ? 'display: none;' : '' }}">
+                            <input type="month" id="datePicker" value="{{ $selectedDate }}"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-2">
+                        </div>
+
+                        <div id="dateFilter" class="relative"
+                            style="{{ $filterType != 'daily' ? 'display: none;' : '' }}">
+                            <input type="date" id="dayPicker" value="{{ $selectedDate }}"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-2">
+                        </div>
+
+                        <button onclick="refreshChart()"
+                            class="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white px-4 py-2 rounded-xl transition-all shadow-md hover:shadow-lg">
+                            <i class="fas fa-chart-line mr-2"></i> Tampilkan
+                        </button>
+
+                        <button onclick="resetFilters()"
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-xl transition-all shadow-md hover:shadow-lg">
+                            <i class="fas fa-undo-alt mr-2"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistik Ringkasan -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-blue-800 text-xs font-semibold uppercase tracking-wide">Total Pendaftar</p>
+                                <p class="text-2xl font-bold text-blue-900 mt-1" id="totalPendaftarStat">
+                                    {{ array_sum($chartDataFiltered) }}
+                                </p>
+                            </div>
+                            <div class="p-2 bg-blue-500 rounded-lg">
+                                <i class="fas fa-users text-white text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-green-800 text-xs font-semibold uppercase tracking-wide">Rata-rata per
+                                    Periode</p>
+                                <p class="text-2xl font-bold text-green-900 mt-1" id="avgPeriodeStat">
+                                    {{ count($chartDataFiltered) > 0 ? round(array_sum($chartDataFiltered) / count($chartDataFiltered)) : 0 }}
+                                </p>
+                            </div>
+                            <div class="p-2 bg-green-500 rounded-lg">
+                                <i class="fas fa-chart-line text-white text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-purple-800 text-xs font-semibold uppercase tracking-wide">Periode Tertinggi
+                                </p>
+                                <p class="text-2xl font-bold text-purple-900 mt-1" id="maxPeriodeStat">
+                                    {{ !empty($chartDataFiltered) ? max($chartDataFiltered) : 0 }}
+                                </p>
+                            </div>
+                            <div class="p-2 bg-purple-500 rounded-lg">
+                                <i class="fas fa-arrow-up text-white text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="h-96">
+                    <canvas id="dynamicChart" class="w-full h-full"></canvas>
+                </div>
+
+                <!-- Keterangan -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <div class="flex items-center justify-center space-x-6 text-xs text-gray-500">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full mr-2"></div>
+                            <span>Jumlah Pendaftar</span>
+                        </div>
+                        <div>
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            <span id="periodInfo">
+                                @if ($filterType == 'daily')
+                                    Data per jam untuk tanggal {{ Carbon\Carbon::parse($selectedDate)->format('d/m/Y') }}
+                                @elseif($filterType == 'monthly')
+                                    Data per bulan untuk tahun {{ $selectedYear }}
+                                @else
+                                    Data 5 tahun terakhir
+                                @endif
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -575,6 +691,146 @@
                     }
                 });
             }
+        </script>
+        <script>
+            // Dynamic chart (Grafik Pendaftar) - inisialisasi dan fungsi refresh
+            const dynamicApiUrl = "{{ route('dashboard.api.chart') }}";
+            const initialLabels = {!! json_encode($chartLabelsFiltered ?? []) !!};
+            const initialData = {!! json_encode($chartDataFiltered ?? []) !!};
+            const initialFilter = "{{ $filterType }}";
+
+            function numberSum(arr) {
+                return arr.reduce((a, b) => a + (Number(b) || 0), 0);
+            }
+
+            const dynamicCanvas = document.getElementById('dynamicChart');
+            let dynamicChart = null;
+
+            if (dynamicCanvas) {
+                const ctx = dynamicCanvas.getContext('2d');
+                dynamicChart = new Chart(ctx, {
+                    // type: initialFilter === 'daily' ? 'line' : 'bar',
+                    type: 'line',
+                    data: {
+                        labels: initialLabels,
+                        datasets: [{
+                            label: 'Jumlah Pendaftar',
+                            data: initialData,
+                            backgroundColor: 'rgba(99,102,241,0.4)',
+                            borderColor: 'rgb(99,102,241)',
+                            borderWidth: 2,
+                            fill: initialFilter === 'daily',
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgb(99,102,241)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateStatsFromData(arr) {
+                const total = numberSum(arr);
+                const avg = arr.length > 0 ? Math.round(total / arr.length) : 0;
+                const max = arr.length > 0 ? Math.max(...arr.map(n => Number(n) || 0)) : 0;
+
+                const totalEl = document.getElementById('totalPendaftarStat');
+                const avgEl = document.getElementById('avgPeriodeStat');
+                const maxEl = document.getElementById('maxPeriodeStat');
+
+                if (totalEl) totalEl.textContent = total;
+                if (avgEl) avgEl.textContent = avg;
+                if (maxEl) maxEl.textContent = max;
+            }
+
+            function toggleFilterVisibility() {
+                const ft = document.getElementById('filterType')?.value;
+                const yearFilter = document.getElementById('yearFilter');
+                const monthFilter = document.getElementById('monthFilter');
+                const dateFilter = document.getElementById('dateFilter');
+
+                if (!ft) return;
+                // Keep behaviour consistent with server-rendered inline styles
+                if (yearFilter) yearFilter.style.display = ft === 'yearly' ? 'none' : '';
+                if (monthFilter) monthFilter.style.display = ft !== 'daily' ? 'none' : '';
+                if (dateFilter) dateFilter.style.display = ft !== 'daily' ? 'none' : '';
+            }
+
+            function refreshChart() {
+                const ft = document.getElementById('filterType')?.value || 'monthly';
+                const params = new URLSearchParams();
+                params.append('filter_type', ft);
+
+                const year = document.getElementById('yearSelect')?.value;
+                if (year) params.append('year', year);
+
+                const monthVal = document.getElementById('datePicker')?.value;
+                if (monthVal) {
+                    // month input returns YYYY-MM, controller doesn't use month param for monthly filter
+                    params.append('month', monthVal.split('-')[1] || '');
+                }
+
+                const dateVal = document.getElementById('dayPicker')?.value;
+                if (dateVal) params.append('date', dateVal);
+
+                fetch(dynamicApiUrl + '?' + params.toString())
+                    .then(res => res.json())
+                    .then(json => {
+                        if (!json.success) return;
+                        if (dynamicChart) {
+                            dynamicChart.data.labels = json.labels;
+                            dynamicChart.data.datasets[0].data = json.data;
+                            dynamicChart.update();
+                        }
+                        updateStatsFromData(json.data);
+
+                        const periodInfo = document.getElementById('periodInfo');
+                        if (periodInfo) {
+                            if (json.filter_type === 'daily') {
+                                periodInfo.textContent = 'Data per jam untuk tanggal ' + (dateVal ||
+                                    '{{ \Carbon\Carbon::parse($selectedDate)->format('d/m/Y') }}');
+                            } else if (json.filter_type === 'monthly') {
+                                periodInfo.textContent = 'Data per bulan untuk tahun ' + (year || '{{ $selectedYear }}');
+                            } else {
+                                periodInfo.textContent = 'Data 5 tahun terakhir';
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Gagal memuat data chart:', err);
+                    });
+            }
+
+            function resetFilters() {
+                const ftEl = document.getElementById('filterType');
+                if (ftEl) ftEl.value = 'monthly';
+                const yearEl = document.getElementById('yearSelect');
+                if (yearEl) yearEl.value = '{{ $selectedYear }}';
+                const monthEl = document.getElementById('datePicker');
+                if (monthEl) monthEl.value = '{{ $selectedDate }}';
+                const dateEl = document.getElementById('dayPicker');
+                if (dateEl) dateEl.value = '{{ $selectedDate }}';
+                toggleFilterVisibility();
+                refreshChart();
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const ft = document.getElementById('filterType');
+                if (ft) ft.addEventListener('change', toggleFilterVisibility);
+                toggleFilterVisibility();
+                updateStatsFromData(initialData || []);
+            });
         </script>
     @endpush
 @endsection
