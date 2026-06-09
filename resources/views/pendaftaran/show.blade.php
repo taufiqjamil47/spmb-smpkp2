@@ -3,6 +3,9 @@
 @section('title', 'Detail Pendaftar')
 
 @section('content')
+    @php
+        $pendaftaranQuery = request()->only(['page', 'search', 'tahun']);
+    @endphp
     <div class="div mt-8">
         <!-- Header Section with Gradient -->
         <div
@@ -38,7 +41,7 @@
                         @endif
 
                         @if (auth()->user()->role === 'admin' && !$pendaftar->trashed())
-                            <a href="{{ route('pendaftaran.edit', $pendaftar->id) }}"
+                            <a href="{{ route('pendaftaran.edit', $pendaftar->id) }}{{ !empty($pendaftaranQuery) ? '?' . http_build_query($pendaftaranQuery) : '' }}"
                                 class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
                                 <i class="fas fa-edit mr-2"></i>Edit Data
                             </a>
@@ -48,7 +51,7 @@
                             class="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
                             <i class="fas fa-print mr-2"></i>Cetak Kartu
                         </a>
-                        <a href="{{ route('pendaftaran.index') }}"
+                        <a href="{{ route('pendaftaran.index') }}{{ !empty($pendaftaranQuery) ? '?' . http_build_query($pendaftaranQuery) : '' }}"
                             class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-md hover:shadow-lg">
                             <i class="fas fa-arrow-left mr-2"></i>Kembali
                         </a>

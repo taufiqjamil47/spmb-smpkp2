@@ -3,6 +3,9 @@
 @section('title', 'Data Pendaftar')
 
 @section('content')
+    @php
+        $pendaftaranQuery = request()->only(['page', 'search', 'tahun']);
+    @endphp
     <div class="div mt-8">
         <!-- Welcome Section -->
         <div class="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg p-6 text-white relative">
@@ -229,7 +232,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex space-x-1.5">
-                                        <a href="{{ route('pendaftaran.show', $siswa->id) }}"
+                                        <a href="{{ route('pendaftaran.show', $siswa->id) }}{{ !empty($pendaftaranQuery) ? '?' . http_build_query($pendaftaranQuery) : '' }}"
                                             class="text-blue-600 hover:text-white hover:bg-blue-600 p-2 rounded-lg transition-all"
                                             title="Lihat detail">
                                             <i class="fas fa-eye"></i>
@@ -242,7 +245,7 @@
                                         </a>
 
                                         @if (auth()->user()->role === 'admin')
-                                            <a href="{{ route('pendaftaran.edit', $siswa->id) }}"
+                                            <a href="{{ route('pendaftaran.edit', $siswa->id) }}{{ !empty($pendaftaranQuery) ? '?' . http_build_query($pendaftaranQuery) : '' }}"
                                                 class="text-yellow-600 hover:text-white hover:bg-yellow-600 p-2 rounded-lg transition-all"
                                                 title="Edit data">
                                                 <i class="fas fa-edit"></i>
@@ -266,6 +269,9 @@
                                         class="hidden">
                                         @csrf
                                         @method('DELETE')
+                                        <input type="hidden" name="page" value="{{ $pendaftaranQuery['page'] ?? '' }}">
+                                        <input type="hidden" name="search" value="{{ $pendaftaranQuery['search'] ?? '' }}">
+                                        <input type="hidden" name="tahun" value="{{ $pendaftaranQuery['tahun'] ?? '' }}">
                                     </form>
                                 </td>
                             </tr>

@@ -3,6 +3,9 @@
 @section('title', 'Edit Data Pendaftar')
 
 @section('content')
+    @php
+        $pendaftaranQuery = request()->only(['page', 'search', 'tahun']);
+    @endphp
     <div class="div mt-8">
         <!-- Header Section with Gradient -->
         <div
@@ -28,7 +31,7 @@
                         </div>
                     </div>
                     <div class="flex space-x-3">
-                        <a href="{{ route('pendaftaran.show', $pendaftar->id) }}"
+                        <a href="{{ route('pendaftaran.show', $pendaftar->id) }}{{ !empty($pendaftaranQuery) ? '?' . http_build_query($pendaftaranQuery) : '' }}"
                             class="bg-white text-yellow-600 px-4 py-2 rounded-xl hover:bg-gray-100 transition-all font-medium">
                             <i class="fas fa-arrow-left mr-2"></i>Kembali
                         </a>
@@ -59,6 +62,9 @@
             <form action="{{ route('pendaftaran.update', $pendaftar->id) }}" method="POST" class="p-6">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="page" value="{{ old('page', $pendaftaranQuery['page'] ?? '') }}">
+                <input type="hidden" name="search" value="{{ old('search', $pendaftaranQuery['search'] ?? '') }}">
+                <input type="hidden" name="tahun" value="{{ old('tahun', $pendaftaranQuery['tahun'] ?? '') }}">
 
                 <!-- Info Tahun Ajaran -->
                 <div class="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">

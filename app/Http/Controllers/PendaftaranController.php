@@ -150,6 +150,8 @@ class PendaftaranController extends Controller
             $alamatFinal = ucfirst($alamatAsli);
         }
 
+        $formattedSekolahAsal = $this->formatSchoolName($request->sekolah_asal);
+
         // Siapkan data untuk disimpan
         $data = [
             'no_peserta' => $no_peserta,
@@ -177,7 +179,7 @@ class PendaftaranController extends Controller
             // 'no_telp' => $request->no_telp,
 
             // Sekolah
-            'sekolah_asal' => strtoupper($request->sekolah_asal),
+            'sekolah_asal' => $formattedSekolahAsal,
             'tahun_lulus' => $request->tahun_lulus,
 
             // Kesehatan
@@ -305,6 +307,8 @@ class PendaftaranController extends Controller
             'tahun_lahir_wali' => 'nullable|digits:4',
         ]);
 
+        $formattedSekolahAsal = $this->formatSchoolName($request->sekolah_asal);
+
         // Siapkan data untuk update
         $data = [
             'tahun_ajaran_id' => $request->tahun_ajaran_id,
@@ -331,7 +335,7 @@ class PendaftaranController extends Controller
             // 'no_telp' => $request->no_telp,
 
             // Sekolah
-            'sekolah_asal' => strtoupper($request->sekolah_asal),
+            'sekolah_asal' => $formattedSekolahAsal,
             'tahun_lulus' => $request->tahun_lulus,
 
             // Kesehatan
@@ -370,7 +374,11 @@ class PendaftaranController extends Controller
         // Update data
         $pendaftar->update($data);
 
-        return redirect()->route('pendaftaran.show', $pendaftar->id)
+        $redirectParams = array_filter($request->only(['page', 'search', 'tahun']), function ($value) {
+            return $value !== null && $value !== '';
+        });
+
+        return redirect()->route('pendaftaran.show', array_merge(['id' => $pendaftar->id], $redirectParams))
             ->with('success', 'Data siswa berhasil diperbarui.');
     }
 
@@ -424,7 +432,11 @@ class PendaftaranController extends Controller
             ]);
         }
 
-        return redirect()->route('pendaftaran.index')
+        $redirectParams = array_filter(request()->only(['page', 'search', 'tahun']), function ($value) {
+            return $value !== null && $value !== '';
+        });
+
+        return redirect()->route('pendaftaran.index', $redirectParams)
             ->with('success', 'Data siswa berhasil dipindahkan ke trash.');
     }
 
@@ -685,6 +697,15 @@ class PendaftaranController extends Controller
             },
             'template-import-ppdb.xlsx'
         );
+    }
+
+    private function formatSchoolName(string $schoolName): string
+    {
+        $schoolName = strtoupper(trim($schoolName));
+
+        return preg_replace_callback('/(\d+)$/', function ($matches) {
+            return strlen($matches[1]) === 1 ? str_pad($matches[1], 2, '0', STR_PAD_LEFT) : $matches[1];
+        }, $schoolName);
     }
 
     private function createPendingGroupingForStudent(CalonSiswa $student, string $priority = 'high')
