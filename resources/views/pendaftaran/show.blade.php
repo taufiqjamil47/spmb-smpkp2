@@ -63,7 +63,7 @@
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="p-6">
                 <!-- Header Info Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pb-6 mb-6 border-b border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5 pb-6 mb-6 border-b border-gray-200">
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
                         <p class="text-sm text-gray-500 mb-1">
                             <i class="fas fa-id-card text-blue-500 mr-1"></i> Nomor Peserta
@@ -76,6 +76,40 @@
                         </p>
                         <p class="text-xl font-bold text-gray-800">{{ $pendaftar->tahunAjaran->tahun_ajaran ?? '-' }}</p>
                     </div>
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4">
+                        <p class="text-sm text-gray-500 mb-1">
+                            <i class="fas fa-flag text-purple-500 mr-1"></i> Status Pendaftaran
+                        </p>
+                        <div class="mt-2">
+                            @if ($pendaftar->status === 'accepted')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-2"></i> Diterima
+                                </span>
+                            @elseif ($pendaftar->status === 'waiting')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-hourglass-half mr-2"></i> Antrian
+                                </span>
+                            @elseif ($pendaftar->status === 'rejected')
+                                <span
+                                    class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-red-100 text-red-800">
+                                    <i class="fas fa-times-circle mr-2"></i> Ditolak
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                    @if ($pendaftar->status === 'waiting')
+                        <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4">
+                            <p class="text-sm text-gray-500 mb-1">
+                                <i class="fas fa-list-ol text-orange-500 mr-1"></i> Nomor Antrian
+                            </p>
+                            <p class="text-3xl font-bold text-orange-600">#{{ $pendaftar->queue_position }}</p>
+                            <p class="text-xs text-gray-500 mt-2">
+                                Terdaftar: {{ \Carbon\Carbon::parse($pendaftar->queue_date)->format('d M Y H:i') ?? '-' }}
+                            </p>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Request Satu Kelaskan Info -->
@@ -97,7 +131,8 @@
                                     <div class="space-y-2">
                                         <p class="text-sm text-gray-700">
                                             <strong class="text-indigo-700">Group:</strong>
-                                            <span class="font-semibold">{{ $pendaftar->groupingRequest->group_name }}</span>
+                                            <span
+                                                class="font-semibold">{{ $pendaftar->groupingRequest->group_name }}</span>
                                         </p>
                                         <p class="text-sm text-gray-700">
                                             <strong class="text-indigo-700">Status:</strong>

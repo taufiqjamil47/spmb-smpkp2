@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Response;
+use App\Models\CalonSiswa;
+use App\Observers\CalonSiswaObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register observer untuk CalonSiswa model
+        CalonSiswa::observe(CalonSiswaObserver::class);
+
         Response::macro('success', function ($data = null, $message = 'OK', $status = 200) {
             return response()->json(['success' => true, 'message' => $message, 'data' => $data], $status);
         });

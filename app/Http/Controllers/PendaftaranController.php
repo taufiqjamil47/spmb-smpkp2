@@ -25,7 +25,8 @@ class PendaftaranController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
                     ->orWhere('no_peserta', 'like', "%{$search}%")
-                    ->orWhere('nisn', 'like', "%{$search}%");
+                    ->orWhere('nisn', 'like', "%{$search}%")
+                    ->orWhere('sekolah_asal', 'like', "%{$search}%");
             });
         }
 
@@ -54,14 +55,12 @@ class PendaftaranController extends Controller
                 ->with('error', 'Belum ada tahun ajaran yang aktif. Silakan hubungi admin.');
         }
 
-        // Cek kuota
-        $jumlahPendaftar = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)->count();
-        if ($jumlahPendaftar >= $tahunAjaranAktif->kuota) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Maaf, kuota pendaftaran tahun ini sudah penuh.');
-        }
+        // Ambil info kuota dan jumlah pendaftar untuk ditampilkan di form
+        $jumlahPendaftar = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)->accepted()->count();
+        $jumlahAntrian = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)->waiting()->count();
+        $kuota = $tahunAjaranAktif->kuota;
 
-        return view('pendaftaran.create', compact('tahunAjaranAktif'));
+        return view('pendaftaran.create', compact('tahunAjaranAktif', 'jumlahPendaftar', 'jumlahAntrian', 'kuota'));
     }
 
     public function store(Request $request)
@@ -152,6 +151,24 @@ class PendaftaranController extends Controller
 
         $formattedSekolahAsal = $this->formatSchoolName($request->sekolah_asal);
 
+        // CEK STATUS PENDAFTARAN: ACCEPTED atau WAITING?
+        $jumlahAccepted = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)->accepted()->count();
+        $status = 'accepted'; // Default: accepted
+        $queuePosition = null;
+        $queueDate = null;
+
+        if ($jumlahAccepted >= $tahunAjaranAktif->kuota) {
+            // Jika kuota sudah penuh, masuk ke waiting list
+            $status = 'waiting';
+            $queueDate = now();
+            // Hitung posisi antrian berikutnya
+            $lastQueue = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                ->waiting()
+                ->orderBy('queue_position', 'desc')
+                ->first();
+            $queuePosition = ($lastQueue ? $lastQueue->queue_position : 0) + 1;
+        }
+
         // Siapkan data untuk disimpan
         $data = [
             'no_peserta' => $no_peserta,
@@ -215,6 +232,11 @@ class PendaftaranController extends Controller
             'no_hp_ortu' => $request->no_hp_ortu,
             'requested_with_names' => $requestedWithNames,
             'grouping_priority' => $request->grouping_priority,
+
+            // Status pendaftaran dan antrian
+            'status' => $status,
+            'queue_position' => $queuePosition,
+            'queue_date' => $queueDate,
         ];
 
         // Simpan data
@@ -425,6 +447,10 @@ class PendaftaranController extends Controller
         // Soft delete
         $calonSiswa->delete();
 
+        // Setelah soft delete, coba promote siswa dari waiting list
+        $tahunAjaranId = $calonSiswa->tahun_ajaran_id;
+        $this->promoteFromWaitingList($tahunAjaranId);
+
         if (request()->ajax()) {
             return response()->json([
                 'success' => true,
@@ -438,6 +464,42 @@ class PendaftaranController extends Controller
 
         return redirect()->route('pendaftaran.index', $redirectParams)
             ->with('success', 'Data siswa berhasil dipindahkan ke trash.');
+    }
+
+    /**
+     * Promote siswa dari waiting list ke accepted jika ada slot kosong
+     * Digunakan ketika ada siswa yang undur diri
+     */
+    private function promoteFromWaitingList($tahunAjaranId)
+    {
+        $tahunAjaran = TahunAjaran::findOrFail($tahunAjaranId);
+
+        // Hitung jumlah siswa yang ACCEPTED (tidak termasuk yang di-trash)
+        $jumlahAccepted = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranId)
+            ->accepted()
+            ->count();
+
+        // Jika masih ada kuota, promote siswa pertama dari antrian
+        if ($jumlahAccepted < $tahunAjaran->kuota) {
+            $firstInQueue = CalonSiswa::where('tahun_ajaran_id', $tahunAjaranId)
+                ->waiting()
+                ->orderBy('queue_date', 'asc') // FIFO - First In First Out
+                ->first();
+
+            if ($firstInQueue) {
+                $firstInQueue->update([
+                    'status' => 'accepted',
+                    'queue_position' => null,
+                    'promoted_at' => now(),
+                ]);
+
+                Log::info("Siswa dipromosikan dari waiting list", [
+                    'siswa_id' => $firstInQueue->id,
+                    'nama' => $firstInQueue->nama_lengkap,
+                    'tahun_ajaran_id' => $tahunAjaranId
+                ]);
+            }
+        }
     }
 
     public function restore($id)

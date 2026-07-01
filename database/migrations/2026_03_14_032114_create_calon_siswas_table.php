@@ -27,7 +27,7 @@ return new class extends Migration
             $table->year('tahun_lulus');
             $table->string('nama_ayah', 100);
             $table->string('nama_ibu', 100);
-            $table->string('pekerjaan_ortu', 50);
+            // $table->string('pekerjaan_ortu', 50);
             $table->string('no_hp_ortu', 15);
             $table->timestamps();
         });

@@ -76,9 +76,15 @@ class CalonSiswa extends Model
         'grouping_request_id',  // TAMBAHKAN
         'requested_with_names', // TAMBAHKAN
         'grouping_priority',    // TAMBAHKAN
+
+        // Status pendaftaran
+        'status',
+        'queue_position',
+        'queue_date',
+        'promoted_at',
     ];
 
-    protected $dates = ['deleted_at']; // Tambahkan ini
+    protected $dates = ['deleted_at', 'queue_date', 'promoted_at']; // Tambahkan ini
 
     protected static function boot()
     {
@@ -213,5 +219,86 @@ class CalonSiswa extends Model
     {
         return $query->whereNull('grouping_request_id')
             ->whereNull('requested_with_names');
+    }
+
+    /**
+     * ========== SCOPE METHODS UNTUK STATUS PENDAFTARAN ==========
+     */
+
+    /**
+     * Scope untuk filter siswa dengan status ACCEPTED (diterima)
+     */
+    public function scopeAccepted($query)
+    {
+        return $query->where('status', 'accepted');
+    }
+
+    /**
+     * Scope untuk filter siswa dengan status WAITING (dalam antrian)
+     */
+    public function scopeWaiting($query)
+    {
+        return $query->where('status', 'waiting')->orderBy('queue_date', 'asc');
+    }
+
+    /**
+     * Scope untuk filter siswa dengan status REJECTED (ditolak)
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
+
+    /**
+     * Method untuk promote siswa dari waiting ke accepted
+     * Digunakan ketika ada siswa yang undur diri
+     */
+    public function promoteFromWaiting()
+    {
+        // Ambil siswa pertama dari antrian berdasarkan queue_date (FIFO - First In First Out)
+        $nextInQueue = self::where('tahun_ajaran_id', $this->tahun_ajaran_id)
+            ->waiting()
+            ->first();
+
+        if ($nextInQueue) {
+            $nextInQueue->update([
+                'status' => 'accepted',
+                'queue_position' => null,
+                'promoted_at' => now(),
+            ]);
+
+            return $nextInQueue;
+        }
+
+        return null;
+    }
+
+    /**
+     * Method untuk recalculate queue positions
+     * Dipanggil setelah ada perubahan pada waiting list
+     */
+    public function recalculateQueuePositions()
+    {
+        $waitingStudents = self::where('tahun_ajaran_id', $this->tahun_ajaran_id)
+            ->waiting()
+            ->get();
+
+        foreach ($waitingStudents as $index => $student) {
+            $student->update(['queue_position' => $index + 1]);
+        }
+    }
+
+    /**
+     * Accessor untuk get status label dalam bahasa Indonesia
+     */
+    public function getStatusLabelAttribute()
+    {
+        $labels = [
+            'accepted' => 'Diterima',
+            'waiting' => 'Antrian',
+            'rejected' => 'Ditolak'
+        ];
+
+        return $labels[$this->status] ?? $this->status;
     }
 }

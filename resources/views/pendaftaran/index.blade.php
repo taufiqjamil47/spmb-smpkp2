@@ -202,6 +202,8 @@
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Asal Sekolah</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Tgl Daftar</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Aksi</th>
@@ -224,6 +226,30 @@
                                 </td>
                                 <td class="px-6 py-4 font-mono text-sm text-gray-700">{{ $siswa->nisn ?? '-' }}</td>
                                 <td class="px-6 py-4 text-gray-700">{{ $siswa->sekolah_asal ?? '-' }}</td>
+                                <td class="px-6 py-4">
+                                    @if ($siswa->status === 'accepted')
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-2"></i> Diterima
+                                        </span>
+                                    @elseif ($siswa->status === 'waiting')
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-hourglass-half mr-2"></i> Antrian
+                                            #{{ $siswa->queue_position }}
+                                        </span>
+                                    @elseif ($siswa->status === 'rejected')
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                            <i class="fas fa-times-circle mr-2"></i> Ditolak
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                            -
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center text-sm text-gray-600">
                                         <i class="fas fa-calendar-alt text-gray-400 mr-2 text-xs"></i>
@@ -269,9 +295,12 @@
                                         class="hidden">
                                         @csrf
                                         @method('DELETE')
-                                        <input type="hidden" name="page" value="{{ $pendaftaranQuery['page'] ?? '' }}">
-                                        <input type="hidden" name="search" value="{{ $pendaftaranQuery['search'] ?? '' }}">
-                                        <input type="hidden" name="tahun" value="{{ $pendaftaranQuery['tahun'] ?? '' }}">
+                                        <input type="hidden" name="page"
+                                            value="{{ $pendaftaranQuery['page'] ?? '' }}">
+                                        <input type="hidden" name="search"
+                                            value="{{ $pendaftaranQuery['search'] ?? '' }}">
+                                        <input type="hidden" name="tahun"
+                                            value="{{ $pendaftaranQuery['tahun'] ?? '' }}">
                                     </form>
                                 </td>
                             </tr>
